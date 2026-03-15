@@ -1,0 +1,151 @@
+/* === Global Styles === */
+body {
+    font-family: 'Inter', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    background-color: #1e1e1e;  /* Obsidian dark theme */
+    color: #d4d4d4;
+    margin: 0;
+    padding: 2rem;
+}
+
+main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* === Headings === */
+h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.5px; }
+h2 { font-size: 2rem; font-weight: 600; }
+h3 { font-size: 1.5rem; font-weight: 500; }
+h4 { font-size: 1.25rem; font-weight: 500; }
+h5, h6 { font-weight: 400; }
+
+h1::after, h2::after {
+    content: "";
+    display: block;
+    width: 50px;
+    height: 3px;
+    background-color: #8be9fd;
+    margin-top: 0.3em;
+    border-radius: 2px;
+}
+
+/* === Links === */
+a {
+    color: #8be9fd;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+a:hover {
+    color: #50fa7b;
+    text-decoration: underline;
+}
+
+/* === Blockquotes === */
+blockquote {
+    border-left: 4px solid #6272a4;
+    background: rgba(98, 114, 164, 0.1);
+    padding: 1em 1.5em;
+    margin: 1em 0;
+    border-radius: 4px;
+    color: #ccc;
+}
+
+/* === Images === */
+img {
+    display: block;
+    margin: 1em 0;
+    max-width: 100%;
+    border-radius: 6px;
+    transition: transform 0.3s ease;
+}
+img:hover {
+    transform: scale(1.03);
+}
+
+/* === Inline Code === */
+code {
+    background-color: #2e2e2e;
+    color: #f8f8f2;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95em;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* === Code Blocks === */
+pre {
+    background-color: #2e2e2e;
+    color: #f8f8f2;
+    padding: 1em;
+    overflow-x: auto;
+    border-radius: 6px;
+    margin: 1em 0;
+}
+pre code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95em;
+}
+
+/* === Prism.js Syntax Highlighting === */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata { color: #6272a4; }
+
+.token.keyword,
+.token.selector,
+.token.function,
+.token.class-name,
+.token.atrule { color: #ff79c6; }
+
+.token.string,
+.token.char,
+.token.attr-value,
+.token.regex,
+.token.variable { color: #f1fa8c; }
+
+.token.number,
+.token.constant,
+.token.boolean { color: #bd93f9; }
+
+.token.operator,
+.token.punctuation { color: #f8f8f2; }
+
+.token.deleted { background-color: #ff5555; }
+.token.inserted { background-color: #50fa7b; }
+
+/* === Tables === */
+table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+}
+th, td {
+    border: 1px solid #555;
+    padding: 0.5em 1em;
+}
+th {
+    background-color: #2e2e2e;
+    color: #f8f8f2;
+}
+td {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+}
+tr:nth-child(even) td {
+    background-color: #262626;
+}
+
+/* === Horizontal Rules === */
+hr {
+    border: 0;
+    border-top: 1px solid #555;
+    margin: 2em 0;
+}
+
+/* === Smooth scrolling === */
+html {
+    scroll-behavior: smooth;
+}
