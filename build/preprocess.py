@@ -45,6 +45,19 @@ def ensure_images_on_newline(text: str) -> str:
             new_lines.append(line)
     return "\n".join(new_lines)
 
+def ensure_blank_line_before_list(text: str) -> str:
+    """Ensure a blank line exists before a list (-, *, +) if not already present."""
+    lines = text.splitlines()
+    new_lines = []
+    for i, line in enumerate(lines):
+        stripped = line.lstrip()
+        if re.match(r'^[-*+]\s+', stripped):
+            # if previous line exists and is not blank, insert a blank line
+            if new_lines and new_lines[-1].strip() != "":
+                new_lines.append("")
+        new_lines.append(line)
+    return "\n".join(new_lines)
+
 # ---
 
 def preprocess_markdown_file(md_path: Path, out_path: Path):
@@ -53,6 +66,7 @@ def preprocess_markdown_file(md_path: Path, out_path: Path):
     text = replace_wiki_links(text)
     text = replace_image_size_syntax(text)
     text = ensure_images_on_newline(text)
+    text = ensure_blank_line_before_list(text)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(text)
