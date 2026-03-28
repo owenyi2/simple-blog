@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2026-02-17" />
+  <title>Using Interactive Broker’s TWSAPI</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        background-color: #232629;
+        color: #7a7c7d;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
+    div.sourceCode
+      { color: #cfcfc2; background-color: #232629; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #cfcfc2; } /* Normal */
+    code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+    code span.an { color: #3f8058; } /* Annotation */
+    code span.at { color: #2980b9; } /* Attribute */
+    code span.bn { color: #f67400; } /* BaseN */
+    code span.bu { color: #7f8c8d; } /* BuiltIn */
+    code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #3daee9; } /* Char */
+    code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+    code span.co { color: #7a7c7d; } /* Comment */
+    code span.cv { color: #7f8c8d; } /* CommentVar */
+    code span.do { color: #a43340; } /* Documentation */
+    code span.dt { color: #2980b9; } /* DataType */
+    code span.dv { color: #f67400; } /* DecVal */
+    code span.er { color: #da4453; text-decoration: underline; } /* Error */
+    code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+    code span.fl { color: #f67400; } /* Float */
+    code span.fu { color: #8e44ad; } /* Function */
+    code span.im { color: #27ae60; } /* Import */
+    code span.in { color: #c45b00; } /* Information */
+    code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+    code span.op { color: #cfcfc2; } /* Operator */
+    code span.ot { color: #27ae60; } /* Other */
+    code span.pp { color: #27ae60; } /* Preprocessor */
+    code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+    code span.sc { color: #3daee9; } /* SpecialChar */
+    code span.ss { color: #da4453; } /* SpecialString */
+    code span.st { color: #f44f4f; } /* String */
+    code span.va { color: #27aeae; } /* Variable */
+    code span.vs { color: #da4453; } /* VerbatimString */
+    code span.wa { color: #da4453; } /* Warning */
+  </style>
+  <!-- "pandoc -H file" option embeds the text from "file" directly. So this is a file with CSS but wrapped in HTML <style> tags. Don't @ me. Actually do @ me if you have a nice **simple** fix because this also hurts my aesthetic sensibilities -->
+  <style>
+  /* Justify text */
+  body {
+      text-align: justify;
+  }
+  h2, h3, h4, h5, h6 {
+      text-align: left;
+  }
+
+  /* Give Code Blocks more margin */
+  pre {
+      margin: 20px 0; /* top & bottom margin */
+      padding: 15px;  /* internal padding for readability */
+      background-color: #f5f5f5; /* optional: light gray background */
+      border-radius: 5px; /* optional: rounded corners */
+      overflow-x: auto;  /* horizontal scroll if code is long */
+  }
+
+  /* Inline code styling */
+  code {
+      padding: 2px 4px;
+      background-color: #eee;
+      border-radius: 3px;
+      line-height: 1.4;     /* spacing for inline code */
+  }
+
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Using Interactive Broker’s TWSAPI</h1>
+<p class="date">2026-02-17</p>
+</header>
+<p>Documentation: <a
+href="https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/"
+class="uri">https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/</a></p>
+<h1 id="setup">Setup</h1>
+<ol start="0" type="1">
+<li><p>Have an IBKR account</p></li>
+<li><p>Download Trader Work Station or IBGateway</p>
+<ul>
+<li><a
+href="https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/#tws-download"
+class="uri">https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/#tws-download</a></li>
+</ul></li>
+<li><p>Download the TWSAPI</p>
+<ul>
+<li><p><a
+href="https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/#find-the-api"
+class="uri">https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/#find-the-api</a></p></li>
+<li><p>If you are on Mac or Linux, you should see a zip folder like
+<code>twsapi_macunix.1030.01.zip</code>. Unzipping that gives
+<code>twsapi</code> folder</p></li>
+<li><p>Make a virtual environment and simply pip install the python
+client like
+<code>python3 -m pip install ./twsapi/IBJts/source/pythonclient</code></p>
+<h1 id="architecture-of-the-twsapi">Architecture of the TWSAPI</h1></li>
+</ul></li>
+</ol>
+<p>Inside <code>twsapi/IBJts/source/pythonclient/ibapi/</code> you can
+see the guts of the python library. Importantly there is
+<code>client.py</code> and <code>wrapper.py</code></p>
+<p><code>client.py</code> provides the class <code>EClient</code> and
+<code>wrapper.py</code> provides the class <code>EWrapper</code>.
+<code>EClient</code> has functions such as:</p>
+<ul>
+<li><p><code>reqMktData</code>: Call this function to request market
+data. The market data will be returned by the tickPrice and tickSize
+events.</p></li>
+<li><p><code>reqContractDetails</code>: Call this function to download
+all details for a particular underlying. The contract details will be
+received via the contractDetails() function on the EWrapper.</p></li>
+<li><p><code>reqSecDefOptParams</code>: Requests security definition
+option parameters for viewing a contract’s option chain</p></li>
+</ul>
+<p>An app using TWSAPI will subclass both <code>EWrapper</code> and
+<code>EClient</code>. To run our app, we open up and login to TWS or
+IBGateway and the <code>EClient</code> will provide us with a
+<code>connect</code> function which establishes a socket between
+TWS/IBGateway and our app.</p>
+<p>Once connected, our app will call <code>EClient</code> functions to
+send requests and the responses will be delivered to
+<code>EWrapper</code>. To access those responses, we will overload
+callback functions outlined by <code>EWrapper</code> such as:</p>
+<ul>
+<li><p><code>tickPrice</code>: Market data tick price callback. Handles
+all price related ticks.</p></li>
+<li><p><code>tickSize</code>: Market data tick size callback. Handles
+all size-related ticks.</p></li>
+<li><p><code>contractDetails</code>: Receives the full contract’s
+definitions.</p></li>
+</ul>
+<p>To better understand the api, the most relevant files to look at are
+<code>client.py</code>, <code>decoder.py</code>,
+<code>wrapper.py</code>.</p>
+<p>Summarised and paraphrased version of <code>client.py</code></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> queue</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ibapi <span class="im">import</span> decoder, comm</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EClient(<span class="bu">object</span>):</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, wrapper):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.msg_queue <span class="op">=</span> queue.Queue()</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.wrapper <span class="op">=</span> wrapper</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ...</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ... </span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> run(<span class="va">self</span>):</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;This is the function that has the message loop.&quot;&quot;&quot;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">self</span>.isConnected() <span class="kw">or</span> <span class="kw">not</span> <span class="va">self</span>.msg_queue.empty(): </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            text <span class="op">=</span> <span class="va">self</span>.msg_queue.get(block<span class="op">=</span><span class="va">True</span>, timeout<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            fields <span class="op">=</span> comm.read_fields(text)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.decoder.interpret(fields) <span class="co"># &lt;-- eventually calls EWrapper functions</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.disconnect()</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>                </span></code></pre></div>
+<p>The entry point is the <code>run</code> function which will consume
+response messages from IBGateway or Trader Workstation and deserialise
+them.</p>
+<ul>
+<li><p>If you look at <code>decoder.py</code> you see
+<code>decoder.interpret</code> finds the appropriate
+<code>EWrapper</code> method to use and then calls
+<code>decoder.interpretWithSignature</code> which actually calls the
+<code>EWrapper</code> method to receive the parsed response</p>
+<h1 id="basic-example">Basic Example</h1></li>
+</ul>
+<p>Given we understand the architecture of the TWS API, we can write our
+app.</p>
+<ul>
+<li><p>We subclass <code>EWrapper</code> and
+<code>EClient</code></p></li>
+<li><p>We create a thread to execute the <code>EClient.run</code>
+function in the background which will forward responses over to our
+app</p></li>
+<li><p>In the main thread we can run our own function
+<code>run_app</code> and call <code>EClient</code> functions like
+<code>reqMktData</code> to actually request data</p></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> threading</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ibapi.client <span class="im">import</span> EClient</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ibapi.wrapper <span class="im">import</span> EWrapper</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ibapi.contract <span class="im">import</span> Contract</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GetData(EWrapper, EClient):</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        EClient.<span class="fu">__init__</span>(<span class="va">self</span>, <span class="va">self</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.connected_event <span class="op">=</span> threading.Event()</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.next_order_id <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> nextValidId(<span class="va">self</span>, orderId: <span class="bu">int</span>):</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f&quot;nextValidId: </span><span class="sc">{</span>orderId<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.next_order_id <span class="op">=</span> orderId</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.connected_event.<span class="bu">set</span>()   <span class="co"># API is ready </span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> contractDetails(<span class="va">self</span>, reqId, contractDetails):</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">&quot;CONTRACT DETAILS:&quot;</span>, reqId, contractDetails)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> shutdown(<span class="va">self</span>):</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">&quot;Shutting down...&quot;</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.disconnect()</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">hasattr</span>(<span class="va">self</span>, <span class="st">&quot;api_thread&quot;</span>):</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.api_thread.join(timeout<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">&quot;Shutdown complete.&quot;</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> start_app():</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    app <span class="op">=</span> GetData()</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    app.<span class="ex">connect</span>(<span class="st">&quot;127.0.0.1&quot;</span>, <span class="dv">4002</span>, clientId<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    api_thread <span class="op">=</span> threading.Thread(target<span class="op">=</span>app.run, daemon<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    api_thread.start()</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    app.api_thread <span class="op">=</span> api_thread</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> app.connected_event.wait(timeout<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">&quot;IBKR connection timed out&quot;</span>)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># app.reqMarketDataType(3)</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> app</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_app(app):</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> Contract()</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    c.symbol <span class="op">=</span> <span class="st">&quot;3690&quot;</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    c.secType <span class="op">=</span> <span class="st">&quot;STK&quot;</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    c.exchange <span class="op">=</span> <span class="st">&quot;SEHK&quot;</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    c.currency <span class="op">=</span> <span class="st">&quot;HKD&quot;</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    app.reqContractDetails(</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>        reqId <span class="op">=</span> <span class="dv">420</span>,</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>        contract <span class="op">=</span> c,</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>    app_instance <span class="op">=</span> start_app()</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>    run_app(app_instance)</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>            time.sleep(<span class="dv">1</span>)</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">KeyboardInterrupt</span>:</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">KeyboardInterrupt received&quot;</span>)</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>        app_instance.shutdown() </span></code></pre></div>
+<h2 id="reqid">ReqId</h2>
+<p>Because requests and responses are sent/received asynchronously, we
+need a way to keep track of which responses came from which request.
+This is important when we send multiple different requests e.g. a
+request for each ticker. For a more complex example, we would need to
+keep a map of which reqId corresponds to which request and
+parameters.</p>
+<h2 id="ports">Ports</h2>
+<p><code>app.connect()</code> takes in address, port, and clientID. By
+default ports are set to mean</p>
+<ul>
+<li><p>4001: IBGateway live trading</p></li>
+<li><p>4002: IBGateway paper trading</p></li>
+<li><p>7496: TWS live trading</p></li>
+<li><p>7497: TWS paper trading</p></li>
+</ul>
+<p>You can change which port is used by going to IBGateway &gt;
+Configure (in the toolbar) &gt; Settings &gt; API &gt; Settings.</p>
+<h2 id="threading.event"><code>threading.Event()</code></h2>
+<p>Documentation for <code>threading</code> library: <a
+href="https://docs.python.org/3/library/threading.html"
+class="uri">https://docs.python.org/3/library/threading.html</a></p>
+<blockquote>
+<p>An event manages a flag that can be set to true with the
+<code>set()</code> method and reset to false with the
+<code>clear()</code> method. The <code>wait()</code> method blocks until
+the flag is true. The flag is initially false.</p>
+</blockquote>
+<p>Before we start making requests in our <code>run_app</code> function,
+we want to ensure that our app is connected. That is why we will wait
+for the <code>app.connected_event</code>.</p>
+<p>When the app connects to TWS/IBGateway, the <code>nextValidId</code>
+will be called and <code>app.connected_event</code> will be set to
+true.</p>
+<h2 id="contract"><code>Contract</code></h2>
+<p>Documentation: <a
+href="https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/#contracts"
+class="uri">https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/#contracts</a></p>
+<p>You will need to provide enough details when constructing the
+<code>Contract</code> object in order to uniquely specify a financial
+instrument.</p>
+</body>
+</html>

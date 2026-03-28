@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2026-03-03" />
+  <title>Tinyhouse Chess Engine Part II: Move Generation</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        background-color: #232629;
+        color: #7a7c7d;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
+    div.sourceCode
+      { color: #cfcfc2; background-color: #232629; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #cfcfc2; } /* Normal */
+    code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+    code span.an { color: #3f8058; } /* Annotation */
+    code span.at { color: #2980b9; } /* Attribute */
+    code span.bn { color: #f67400; } /* BaseN */
+    code span.bu { color: #7f8c8d; } /* BuiltIn */
+    code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #3daee9; } /* Char */
+    code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+    code span.co { color: #7a7c7d; } /* Comment */
+    code span.cv { color: #7f8c8d; } /* CommentVar */
+    code span.do { color: #a43340; } /* Documentation */
+    code span.dt { color: #2980b9; } /* DataType */
+    code span.dv { color: #f67400; } /* DecVal */
+    code span.er { color: #da4453; text-decoration: underline; } /* Error */
+    code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+    code span.fl { color: #f67400; } /* Float */
+    code span.fu { color: #8e44ad; } /* Function */
+    code span.im { color: #27ae60; } /* Import */
+    code span.in { color: #c45b00; } /* Information */
+    code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+    code span.op { color: #cfcfc2; } /* Operator */
+    code span.ot { color: #27ae60; } /* Other */
+    code span.pp { color: #27ae60; } /* Preprocessor */
+    code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+    code span.sc { color: #3daee9; } /* SpecialChar */
+    code span.ss { color: #da4453; } /* SpecialString */
+    code span.st { color: #f44f4f; } /* String */
+    code span.va { color: #27aeae; } /* Variable */
+    code span.vs { color: #da4453; } /* VerbatimString */
+    code span.wa { color: #da4453; } /* Warning */
+  </style>
+  <!-- "pandoc -H file" option embeds the text from "file" directly. So this is a file with CSS but wrapped in HTML <style> tags. Don't @ me. Actually do @ me if you have a nice **simple** fix because this also hurts my aesthetic sensibilities -->
+  <style>
+  /* Justify text */
+  body {
+      text-align: justify;
+  }
+  h2, h3, h4, h5, h6 {
+      text-align: left;
+  }
+
+  /* Give Code Blocks more margin */
+  pre {
+      margin: 20px 0; /* top & bottom margin */
+      padding: 15px;  /* internal padding for readability */
+      background-color: #f5f5f5; /* optional: light gray background */
+      border-radius: 5px; /* optional: rounded corners */
+      overflow-x: auto;  /* horizontal scroll if code is long */
+  }
+
+  /* Inline code styling */
+  code {
+      padding: 2px 4px;
+      background-color: #eee;
+      border-radius: 3px;
+      line-height: 1.4;     /* spacing for inline code */
+  }
+
+  </style>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Tinyhouse Chess Engine Part II: Move Generation</h1>
+<p class="date">2026-03-03</p>
+</header>
+<p>This note follows on from <a
+href="Tinyhouse%20Chess%20Engine%20Part%20I%20-%20Introduction.html">Tinyhouse
+Chess Engine Part I - Introduction</a>. For this note, I will be
+referring to code from my Python notebook which can be found <a
+href="https://github.com/owenyi2/tinyhouse/blob/main/tinyhouse/main.ipynb">here</a>.
+I have also rewritten it to Rust to implement a GUI which you can try
+out <a href="https://owenyi2.github.io/tinyhouse/">here</a>.</p>
+<h1 id="setupconvention">Setup/Convention</h1>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Square(IntEnum):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    a4 <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    b4 <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    c4 <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    d4 <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    a3 <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    b3 <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    c3 <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    d3 <span class="op">=</span> <span class="dv">7</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    a2 <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    b2 <span class="op">=</span> <span class="dv">9</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    c2 <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    d2 <span class="op">=</span> <span class="dv">11</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    a1 <span class="op">=</span> <span class="dv">12</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    b1 <span class="op">=</span> <span class="dv">13</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    c1 <span class="op">=</span> <span class="dv">14</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    d1 <span class="op">=</span> <span class="dv">15</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>BitBoard <span class="op">=</span> <span class="bu">int</span> <span class="co"># specifically a u16 </span></span></code></pre></div>
+<p>The ordering of the squares is because if we arrange the squares
+visually</p>
+<pre><code>  4  . . . .
+  3  . . . .
+  2  . . . .
+  1  . . . .
+
+     a b c d</code></pre>
+<p>We can scan through left to right top to bottom</p>
+<pre><code> 0  1  2  3
+ 4  5  6  7
+ 8  9 10 11
+12 13 14 15
+
+So 0b0000_0100_0000_0001 is a BitBoard with a4 and c2 set
+           ^           ^
+           c2          a4</code></pre>
+<h1 id="attack-masks">Attack Masks</h1>
+<p>Given a piece is in a particular square, we want to know which
+squares are accessible to it. E.g. a Wazir on a2 can move to the
+following squares</p>
+<pre><code>  4  0 0 0 0
+  3  1 0 0 0
+  2  W 1 0 0
+  1  1 0 0 0
+
+     a b c d</code></pre>
+<p>An <em>attack mask</em> maps a single <em>square</em> to a
+<em>bitboard</em>. We will have an <em>attack mask</em> for each of</p>
+<ul>
+<li><p>King</p></li>
+<li><p>Wazir</p></li>
+<li><p>Ferz</p></li>
+<li><p>White Pawn (attacks upwards towards the 4th rank)</p></li>
+<li><p>Black Pawn (attacks downwards towards the 1st rank)</p></li>
+</ul>
+<p>Because the domain has only 16 elements, once we implement the
+functions to generate the attack masks, we can pre-compute the results
+and store them in a table</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>KING_ATTACKS <span class="op">=</span> [<span class="dv">0</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">16</span>)]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>WAZIR_ATTACKS <span class="op">=</span> [<span class="dv">0</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">16</span>)]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>FERZ_ATTACKS <span class="op">=</span> [<span class="dv">0</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">16</span>)]</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>PAWN_ATTACKS <span class="op">=</span> [[<span class="dv">0</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">16</span>)], [<span class="dv">0</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">16</span>)]]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> square <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">16</span>):</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    KING_ATTACKS[square] <span class="op">=</span> mask_king_attacks(square) <span class="co"># functions defined in below subsections</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    WAZIR_ATTACKS[square] <span class="op">=</span> mask_wazir_attacks(square)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    FERZ_ATTACKS[square] <span class="op">=</span> mask_ferz_attacks(square)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    PAWN_ATTACKS[<span class="dv">0</span>][square] <span class="op">=</span> mask_pawn_attacks(<span class="dv">0</span>, square) <span class="co"># White</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    PAWN_ATTACKS[<span class="dv">1</span>][square] <span class="op">=</span> mask_pawn_attacks(<span class="dv">1</span>, square) <span class="co"># Black</span></span></code></pre></div>
+<p>Because the Ma can be blocked by other pieces, the attacks available
+to a single Ma depend not only on the square it is on, but also on the
+complete occupancy bitboard (white occupancy | black occupancy). To
+efficiently look up Ma moves, we will need to use another technique: <a
+href="Tinyhouse%20Chess%20Engine%20Part%20II%20-%20Move%20Generation#Magic%20Tables.html">Tinyhouse
+Chess Engine Part II - Move Generation#Magic Tables</a>.</p>
+<h2 id="wazir">Wazir</h2>
+<p>A wazir moves orthogonally 1 square. Therefore, by bitshifting by 1,
+we can get horizontal moves and bitshifting by 4 gives us vertical
+moves.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mask_wazir_attacks(square: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    attacks <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    bitboard <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    bitboard <span class="op">=</span> set_bit(bitboard, square)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (bitboard <span class="op">&gt;&gt;</span> <span class="dv">4</span>): attacks <span class="op">|=</span> (bitboard <span class="op">&gt;&gt;</span> <span class="dv">4</span>) <span class="co"># Goes up </span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((bitboard <span class="op">&gt;&gt;</span> <span class="dv">1</span>) <span class="op">&amp;</span> NOT_D_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&gt;&gt;</span> <span class="dv">1</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (bitboard <span class="op">&lt;&lt;</span> <span class="dv">4</span>): attacks <span class="op">|=</span> (bitboard <span class="op">&lt;&lt;</span> <span class="dv">4</span>) <span class="op">%</span> U16_MAX </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((bitboard <span class="op">&lt;&lt;</span> <span class="dv">1</span>) <span class="op">&amp;</span> NOT_A_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&lt;&lt;</span> <span class="dv">1</span>) <span class="op">%</span> U16_MAX </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> attacks</span></code></pre></div>
+<p>Recall how the squares are numbered.</p>
+<pre><code>#  0  1  2  3
+#  4  5  6  7
+#  8  9 10 11
+# 12 13 14 15</code></pre>
+<p>Therefore</p>
+<ul>
+<li><p><code>&gt;&gt; 4</code> moves 1 square up e.g. 5-&gt;1</p></li>
+<li><p><code>&lt;&lt; 4</code> moves 1 square down e.g. 5-&gt;9</p></li>
+<li><p><code>&gt;&gt; 1</code> moves 1 square left e.g. 5-&gt;4</p></li>
+<li><p><code>&lt;&lt; 1</code> moves 1 square right
+e.g. 5-&gt;6</p></li>
+</ul>
+<p>Now observe there is a problem if we are on square 8 (a2) and we
+apply <code>&gt;&gt; 1</code> trying to move left. We are on the left
+most edge of the board and so <code>&gt;&gt; 1</code> will bring us to
+square 7 (d3). When we run <code>mask_wazir_attacks(8)</code> we
+want</p>
+<pre><code>  4  0 0 0 0
+  3  1 0 0 0
+  2  0 1 0 0
+  1  1 0 0 0
+
+     a b c d </code></pre>
+<p>and not</p>
+<pre><code>  4  0 0 0 0
+  3  1 0 0 1
+  2  0 1 0 0
+  1  1 0 0 0
+
+     a b c d </code></pre>
+<p>Therefore we only include the result of
+<code>bitboard &gt;&gt; 1</code> if it will not cause a set bit on the d
+file (i.e. <code>&amp; NOT_D_FILE</code> is non-zero) and similarly we
+only include result of <code>bitboard &lt;&lt; 1</code> if it will not
+cause a set bit on the a file (i.e. <code>&amp; NOT_A_FILE</code> is
+non-zero). This is not a problem for vertical moves because if we move
+off the edge, the set bit will either go beyond 0 or beyond the capacity
+of u16 and disappear regardless.</p>
+<h2 id="ferz">Ferz</h2>
+<p>Diagonal moves are similar except we bitshift by 5 or 3
+i.e. combining a vertical and horizontal move.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mask_ferz_attacks(square: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    attacks <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    bitboard <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    bitboard <span class="op">=</span> set_bit(bitboard, square)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((bitboard <span class="op">&gt;&gt;</span> <span class="dv">5</span>) <span class="op">&amp;</span> NOT_D_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&gt;&gt;</span> <span class="dv">5</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((bitboard <span class="op">&gt;&gt;</span> <span class="dv">3</span>) <span class="op">&amp;</span> NOT_A_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&gt;&gt;</span> <span class="dv">3</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((bitboard <span class="op">&lt;&lt;</span> <span class="dv">5</span>) <span class="op">&amp;</span> NOT_A_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&lt;&lt;</span> <span class="dv">5</span>) <span class="op">%</span> U16_MAX </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((bitboard <span class="op">&lt;&lt;</span> <span class="dv">3</span>) <span class="op">&amp;</span> NOT_D_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&lt;&lt;</span> <span class="dv">3</span>) <span class="op">%</span> U16_MAX </span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> attacks</span></code></pre></div>
+<h2 id="king">King</h2>
+<p>We can simply take the union of the Ferz (diagonal) and Wazir
+(orthogonal) attacks.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mask_king_attacks <span class="op">=</span> <span class="kw">lambda</span> sqr: mask_ferz_attacks(sqr) <span class="op">|</span> mask_wazir_attacks(sqr)</span></code></pre></div>
+<h2 id="pawn">Pawn</h2>
+<p>This is similar to the Ferz except the White pawn attacks up towards
+the 4th rank while the Black pawn attacks down towards the 1st rank.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mask_pawn_attacks(side: <span class="bu">int</span>, square: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    attacks <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    bitboard <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    bitboard <span class="op">=</span> set_bit(bitboard, square)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> side <span class="op">==</span> Side.White: <span class="co"># White</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ((bitboard <span class="op">&gt;&gt;</span> <span class="dv">3</span>) <span class="op">&amp;</span> NOT_A_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&gt;&gt;</span> <span class="dv">3</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ((bitboard <span class="op">&gt;&gt;</span> <span class="dv">5</span>) <span class="op">&amp;</span> NOT_D_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&gt;&gt;</span> <span class="dv">5</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ((bitboard <span class="op">&lt;&lt;</span> <span class="dv">3</span>) <span class="op">&amp;</span> NOT_D_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&lt;&lt;</span> <span class="dv">3</span>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ((bitboard <span class="op">&lt;&lt;</span> <span class="dv">5</span>) <span class="op">&amp;</span> NOT_A_FILE): attacks <span class="op">|=</span> (bitboard <span class="op">&lt;&lt;</span> <span class="dv">5</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> attacks</span></code></pre></div>
+<h1 id="ma-moves">Ma moves</h1>
+<p>We require a function that computes the available moves for a Ma
+given 1. The square it is on (16 possible values) 2. The bitboard
+showing which squares are occupied by other pieces (<span
+class="math inline">\(2^{16}\)</span> possible values)</p>
+<p>This can be done slowly with this function which has a bunch of loops
+and checks to see if there are blockers in the way.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_ma_attacks_on_the_fly(square: <span class="bu">int</span>, block_mask: <span class="bu">int</span>):</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    attacks <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    tr <span class="op">=</span> square <span class="op">//</span> <span class="dv">4</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    tf <span class="op">=</span> square <span class="op">%</span> <span class="dv">4</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    deltas <span class="op">=</span> {</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">0</span>, <span class="dv">1</span>): [(<span class="dv">1</span>, <span class="dv">2</span>), (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>)],</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span>, <span class="dv">0</span>): [(<span class="dv">2</span>, <span class="dv">1</span>), (<span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>)],</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>): [(<span class="dv">1</span>, <span class="op">-</span><span class="dv">2</span>), (<span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">2</span>)],</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        (<span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>): [(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>), (<span class="op">-</span><span class="dv">2</span>, <span class="dv">1</span>)]</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (block_dr, block_df), attack_list <span class="kw">in</span> deltas.items():</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        block_r <span class="op">=</span> tr <span class="op">+</span> block_dr</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        block_f <span class="op">=</span> tf <span class="op">+</span> block_df</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        block_square <span class="op">=</span> <span class="dv">4</span> <span class="op">*</span> block_r <span class="op">+</span> block_f </span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="dv">0</span> <span class="op">&lt;=</span> block_square <span class="kw">and</span> block_square <span class="op">&lt;</span> <span class="dv">16</span> <span class="kw">and</span> (<span class="dv">1</span> <span class="op">&lt;&lt;</span> (block_square) <span class="op">&amp;</span> block_mask):</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> dr, df <span class="kw">in</span> attack_list:</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>            r <span class="op">=</span> tr <span class="op">+</span> dr</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>            f <span class="op">=</span> tf <span class="op">+</span> df</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="dv">0</span> <span class="op">&lt;=</span> r <span class="kw">and</span> r <span class="op">&lt;</span> <span class="dv">4</span> <span class="kw">and</span> <span class="dv">0</span> <span class="op">&lt;=</span> f <span class="kw">and</span> f <span class="op">&lt;</span> <span class="dv">4</span>:</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>                attacks <span class="op">|=</span> <span class="dv">1</span> <span class="op">&lt;&lt;</span> (<span class="dv">4</span> <span class="op">*</span> r <span class="op">+</span> f)</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> attacks</span></code></pre></div>
+<p>As it stands, since there are <span
+class="math inline">\(2^{16}\)</span> possible occupancy bitboards, we
+can’t jump straight to pre-computing. However given the square that the
+Ma is on, we don’t really care about the occupancy status of every
+square on the board, only the occupancy status of the 4 orthogonally
+adjacent squares to the Ma, since only those squares could restrict the
+movement of the Ma. In practice, due to how small the board is, the Ma’s
+moves are already rather constrained and so 2 squares are enough to
+completely block the Ma. So only the occupancy status of 2 particular
+orthogonally adjacent squares are relevant.</p>
+<p>Consider the following blockers, and Ma location. Then the only
+squares that can block the b3 Ma’s movement are c3 and b2. By BitAnd-ing
+the occupancy bitboard with the Wazir attack mask we can greatly
+constrain the size of the input domain. There are only <span
+class="math inline">\(2^2\)</span> relevant occupancy configurations to
+consider. Either none, c3, b2 or both are occupied. We can call this the
+relevant blockers bitboard.</p>
+<pre><code>Blockers
+  4  . x . .
+  3  . . x .
+  2  . . . .
+  1  . x x x
+
+     a b c d 
+
+Ma
+  4  . . . .
+  3  . M . .
+  2  . . . .
+  1  . . . .
+
+     a b c d 
+
+Relevant Blockers
+  4  . x . .
+  3  . . x .
+  2  . . . .
+  1  . . . .
+
+     a b c d 
+     
+Attack Mask
+  4  . . . .
+  3  . . . .
+  2  x . x .
+  1  . . . .
+
+     a b c d </code></pre>
+<p>Since there are 16 possible squares the Ma can be on and effectively
+only 4 possible blocking patterns, a table of size <span
+class="math inline">\(16 \times 4 = 64\)</span> can represent the
+function for all possible inputs. The challenge now is to create a
+perfect hash to map (Square, Relevant Blockers bitboard) to Attack
+Mask.</p>
+<p>Our function for generating Ma moves will look like</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_ma_attacks(square: Square, block_mask: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    block_mask <span class="op">&amp;=</span> WAZIR_ATTACKS[square] </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    block_mask <span class="op">*=</span> MAGICS[square]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    magic_index <span class="op">=</span> block_mask <span class="op">&gt;&gt;</span> (<span class="dv">16</span> <span class="op">-</span> <span class="dv">2</span>) <span class="co"># high two bits</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> MA_ATTACKS[square][magic_index]</span></code></pre></div>
+<p>The first step is to intersect the occupancy bitboard to produce the
+relevant blocker bitboard. We hash this into an index into our magic
+table <code>MA_ATTACKS</code> by multiplying the relevant blocker
+bitboard with the appropriate magic number from <code>MAGICS</code> and
+extracting the most significant two bits. Each square will have its own
+magic number to map <span class="math inline">\(2^2\)</span> possible
+relevant blocker bitboards into an index <span
+class="math inline">\(\{0, 1, 2, 3\}\)</span> where we can find the
+correct attack mask.</p>
+<p>For each square, we generate an appropriate magic number by 1.
+Generating all possible blocking patterns</p>
+<pre><code>- In general, a Ma can have at most 4 adjacent orthogonal squares and each square can either be occupied or not leaving at most $2^4$ possible patterns
+
+- Of these 4 adjacent squares, only 2 will actually be relevant to the Ma. That is while there could be $2^4$ unique possible relevant blocking patterns per square, we will only get $2^2$ unique attack patterns per square.
+
+- This is done by using the carry-rippler trick
+    ```python
+    blockers = mask_wazir_attacks(square)
+    blocking_patterns = []
+    while True: 
+        subset = (subset - blockers) &amp; blockers # Iterates through all subsets of the set of set-bits in `blockers`
+        blocking_patterns.append(subset)        
+        if subset == 0:
+            break
+    ```</code></pre>
+<ol start="2" type="1">
+<li>For each blocking pattern, compute on the fly (slow) the correct
+attack mask</li>
+<li>Spam random magic numbers until one works. To see if a number works,
+<ol type="1">
+<li>We create an empty table <code>used_attacks</code> of size 4</li>
+<li>Loop through each <code>pattern</code> from all possible relevant
+blocking patterns (at most 16 possible)</li>
+</ol>
+<ul>
+<li>For a <code>pattern</code>, when we compute the hash
+<code>magic_index = (pattern * magic) &gt;&gt; (16 - 2)</code>, check
+that it either indexes into an empty space in <code>used_attacks</code>
+(in which case we populate that space with the correct attack mask from
+step 2) or that if the space is populated already, it still coincides
+with the attack mask required for this <code>pattern</code> also
+(i.e. constructive collision).</li>
+</ul></li>
+</ol>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_magic():</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> random.randint(<span class="dv">0</span>, <span class="dv">2</span><span class="op">**</span><span class="dv">15</span><span class="op">-</span><span class="dv">1</span>) <span class="op">&amp;</span> random.randint(<span class="dv">0</span>, <span class="dv">2</span><span class="op">**</span><span class="dv">15</span><span class="op">-</span><span class="dv">1</span>) <span class="op">&amp;</span> random.randint(<span class="dv">0</span>, <span class="dv">2</span><span class="op">**</span><span class="dv">15</span><span class="op">-</span><span class="dv">1</span>) <span class="op">&amp;</span> random.randint(<span class="dv">0</span>, <span class="dv">2</span><span class="op">**</span><span class="dv">15</span><span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_magic_number(square: Square) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    blocking_patterns <span class="op">=</span> []</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    subset <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    blockers <span class="op">=</span> mask_wazir_attacks(square)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print_bitboard(blockers)</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        subset <span class="op">=</span> (subset <span class="op">-</span> blockers) <span class="op">&amp;</span> blockers</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        blocking_patterns.append(subset)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> subset <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    relevant_bits <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    attacks <span class="op">=</span> []</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pattern <span class="kw">in</span> blocking_patterns:</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>        attacks.append(generate_ma_attacks_on_the_fly(square, pattern))</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(&quot;NEW&quot;)</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>        magic <span class="op">=</span> generate_magic()</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>        used_attacks <span class="op">=</span> [<span class="dv">0</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>)] <span class="co"># there are at most 4 attack squares for a Ma. Only 2 blockers are relevant. There are hence 2**2 unique attacks patterns per square</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>        fail <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> idx, pattern <span class="kw">in</span> <span class="bu">enumerate</span>(blocking_patterns):</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>            magic_index <span class="op">=</span> (((pattern <span class="op">*</span> magic) <span class="op">%</span> U16_MAX) <span class="op">&gt;&gt;</span> (<span class="dv">16</span> <span class="op">-</span> relevant_bits))  </span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> used_attacks[magic_index] <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>                used_attacks[magic_index] <span class="op">=</span> attacks[idx]</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> used_attacks[magic_index] <span class="op">==</span> attacks[idx]: <span class="co"># constructive collision: blocker configs that map to the same attack pattern (i.e. non-injectively)</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>                <span class="cf">pass</span></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>                fail <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> fail:</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> magic</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>MA_ATTACKS <span class="op">=</span> [[<span class="dv">0</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>)] <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">16</span>)]</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>MAGICS <span class="op">=</span> [] </span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> rank <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>):</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="bu">file</span> <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>):</span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>        square <span class="op">=</span> <span class="dv">4</span> <span class="op">*</span> rank <span class="op">+</span> <span class="bu">file</span></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>        magic <span class="op">=</span> find_magic_number(square)</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(Square(square), magic)</span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>        MAGICS.append(magic)</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>        blockers <span class="op">=</span> mask_wazir_attacks(square) </span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>        relevant_bits <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>        subset <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>            subset <span class="op">=</span> (subset <span class="op">-</span> blockers) <span class="op">&amp;</span> blockers</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>            magic_index <span class="op">=</span> (((subset <span class="op">*</span> magic) <span class="op">%</span> U16_MAX) <span class="op">&gt;&gt;</span> (<span class="dv">16</span> <span class="op">-</span> relevant_bits))</span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a>            MA_ATTACKS[square][magic_index] <span class="op">=</span> generate_ma_attacks_on_the_fly(square, subset)</span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> subset <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span></code></pre></div>
+<h1 id="generating-pseudolegal-moves">Generating Pseudolegal Moves</h1>
+<p>Recall we are representing the Game State like so</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GameState:</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    bitboards: <span class="bu">list</span>[<span class="bu">int</span>] <span class="co"># White King, Wazir, Ma, Ferz, Pawn + Black King, Wazir, Ma, Ferz, Pawn </span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    occupancies: <span class="bu">list</span>[<span class="bu">int</span>] <span class="co"># white black </span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    former_pawns: <span class="bu">int</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    side: <span class="bu">int</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    inventory: <span class="bu">list</span>[<span class="bu">dict</span>[Piece, <span class="bu">int</span>]]</span></code></pre></div>
+<p>We will define a generator to yield all possible moves from a
+particular game state.</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_moves(game_state: GameState) <span class="op">-&gt;</span> Iterator[Move]:</span></code></pre></div>
+<h2 id="placement">Placement</h2>
+<p>We can compute the available squares as
+<code>~(game_state.occupancies[0] | game_state.occupancies[1])</code>.
+For each piece in <code>game_state.inventory</code> and available square
+yield “piece placed at square”. For pawns, we need to skip when the
+square is on 1st or 4th rank since that is an illegal move.</p>
+<h2 id="regular-piece-moves">Regular Piece Moves</h2>
+<p>For each piece, we extract the bitboard showing where all pieces of
+that type are. In the previous post we saw how
+<code>get_ls1b_index</code> allows us to iterate through the set bits of
+a bitboard efficiently. For each square set in that bitboard, we can
+look up the relevant attack mask from our precomputed table. We then
+intersect out squares occupied by our side since you cannot capture your
+own pieces. For the King, we also need to intersect out squares
+reachable by the enemy since we do not want to walk into check.</p>
+<p>To compute the squares reachable by the enemy, it involves very
+similar logic to generating moves. We iterate through each piece of the
+enemy for each square occupied by a piece union together the attack mask
+of that piece at that square.</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>bitboard <span class="op">=</span> game_state.bitboards[Piece.K]</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># generate King Moves</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> ((piece <span class="op">==</span> Piece.K) <span class="cf">if</span> (side <span class="op">==</span> <span class="dv">0</span>) <span class="cf">else</span> (piece <span class="op">==</span> Piece.k)):</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> bitboard:</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        source_square <span class="op">=</span> get_ls1b_index(bitboard)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        attacks <span class="op">=</span> KING_ATTACKS[source_square] <span class="op">&amp;</span> <span class="op">~</span>occupancies[side] <span class="op">&amp;</span> <span class="op">~</span>enemy_attack_mask(game_state, game_state.side)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> attacks:</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>            target_square <span class="op">=</span> get_ls1b_index(attacks)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Quiet Move</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> get_bit(occupancies[<span class="dv">1</span> <span class="op">-</span> side], target_square):</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>                <span class="cf">yield</span> Move(</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>                    source <span class="op">=</span> source_square, </span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>                    target <span class="op">=</span> target_square, </span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>                    piece <span class="op">=</span> piece, </span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>                    promoted_piece <span class="op">=</span> <span class="va">None</span>, </span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>                    capture <span class="op">=</span> <span class="va">False</span>, </span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>                    placement <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>                    )</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Capture </span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>                <span class="cf">yield</span> Move(</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>                    source <span class="op">=</span> source_square, </span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>                    target <span class="op">=</span> target_square, </span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>                    piece <span class="op">=</span> piece, </span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>                    promoted_piece <span class="op">=</span> <span class="va">None</span>, </span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>                    capture <span class="op">=</span> <span class="va">True</span>, </span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>                    placement <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>            attacks <span class="op">=</span> pop_bit(attacks, target_square)</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>        bitboard <span class="op">=</span> pop_bit(bitboard, source_square)</span></code></pre></div>
+<p>For the Pawn it is very similar, however since Pawns move differently
+to how they attack, we also need to account for quiet moves by seeing if
+the square either forward (white) or backward (black) is accessible. For
+the other pieces, inaccessible squares are due to pieces on their one’s
+own side but for pawns, inaccessible squares are due to pieces on both
+sides.</p>
+<p>For the initial state, we get the following moves.</p>
+<pre><code>  4  f m w k
+  3  . . . p
+  2  P . . .
+  1  K W M F
+
+     a b c d
+
+0 to play
+  M: 1
+[Move(source=None, target=4, piece=&lt;Piece.M: 2&gt;, promoted_piece=None, capture=False, placement=True),
+ Move(source=None, target=5, piece=&lt;Piece.M: 2&gt;, promoted_piece=None, capture=False, placement=True),
+ Move(source=None, target=6, piece=&lt;Piece.M: 2&gt;, promoted_piece=None, capture=False, placement=True),
+ Move(source=None, target=9, piece=&lt;Piece.M: 2&gt;, promoted_piece=None, capture=False, placement=True),
+ Move(source=None, target=10, piece=&lt;Piece.M: 2&gt;, promoted_piece=None, capture=False, placement=True),
+ Move(source=None, target=11, piece=&lt;Piece.M: 2&gt;, promoted_piece=None, capture=False, placement=True),
+ Move(source=12, target=9, piece=0, promoted_piece=None, capture=False, placement=False),
+ Move(source=13, target=9, piece=1, promoted_piece=None, capture=False, placement=False),
+ Move(source=14, target=5, piece=2, promoted_piece=None, capture=False, placement=False),
+ Move(source=14, target=7, piece=2, promoted_piece=None, capture=True, placement=False),
+ Move(source=15, target=10, piece=3, promoted_piece=None, capture=False, placement=False),
+ Move(source=8, target=4, piece=4, promoted_piece=None, capture=False, placement=False)]</code></pre>
+<h1 id="making-moves">Making Moves</h1>
+<p>We will require a function
+<code>def make_move(move: Move, game_state: GameState) -&gt; GameState:</code>
+that applies a Move to a GameState to produce a new GameState.</p>
+<p>Making moves is a straightforward but tedious process of popping and
+setting bits in the right places</p>
+<ul>
+<li><p>For example a quiet move of a White Pawn involves</p>
+<ul>
+<li><p>Popping the bit at the source square for the Pawn piece
+bitboard</p></li>
+<li><p>Popping the bit at the source square for the White occupancy
+bitboard</p></li>
+<li><p>Setting the bit at the target square for the Pawn piece
+bitboard</p></li>
+<li><p>Setting the bit at the target square for the White occupancy
+bitboard</p></li>
+</ul></li>
+<li><p>A capture would require in addition</p>
+<ul>
+<li><p>Popping the bit at the target square for every piece bitboard of
+the enemy (we don’t know what piece was captured)</p></li>
+<li><p>Popping the bit at the target square for the enemy occupancy
+bitboard</p></li>
+</ul></li>
+</ul>
+<p>It is also important when a piece promotes, we set the former pawns
+bitboard and when said promoted piece moves, we also move it in the
+former pawns bitboard. This is because when you capture a piece that
+previously was a pawn, you only gain a pawn in your inventory and not
+the piece.</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_move(move: Move, game_state: GameState) <span class="op">-&gt;</span> GameState:</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    new_state <span class="op">=</span> deepcopy(game_state)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> move.placement:</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> new_state.inventory[new_state.side][move.piece] <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        new_state.inventory[new_state.side][move.piece] <span class="op">-=</span> <span class="dv">1</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        new_state.bitboards[move.piece] <span class="op">=</span> set_bit(new_state.bitboards[move.piece], move.target) <span class="co"># place piece</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        new_state.occupancies[new_state.side] <span class="op">=</span> set_bit(new_state.occupancies[new_state.side], move.target) <span class="co"># set occupancy on target</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> move.capture:</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> piece <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> (new_state.bitboards[piece] <span class="op">&amp;</span> (<span class="dv">1</span> <span class="op">&lt;&lt;</span> move.target)):</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">assert</span> <span class="kw">not</span> ((piece <span class="op">==</span> Piece.K) <span class="kw">or</span> (piece <span class="op">==</span> Piece.k))</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">break</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>                <span class="cf">assert</span> <span class="va">False</span>, <span class="st">&quot;Unreachable&quot;</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> get_bit(new_state.former_pawns, move.target):</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>                <span class="co"># captured a former pawn</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>                new_state.inventory[new_state.side][Piece.P <span class="cf">if</span> new_state.side <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> Piece.p] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>                new_state.former_pawns <span class="op">=</span> pop_bit(new_state.former_pawns, move.target)</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>                new_state.inventory[new_state.side][(piece <span class="op">+</span> <span class="dv">5</span>) <span class="op">%</span> <span class="dv">10</span>] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>            new_state.bitboards[piece] <span class="op">=</span> pop_bit(new_state.bitboards[piece], move.target) <span class="co"># additionally remove enemy piece</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>            new_state.occupancies[<span class="dv">1</span><span class="op">-</span>new_state.side] <span class="op">=</span> pop_bit(new_state.occupancies[<span class="dv">1</span><span class="op">-</span>new_state.side], move.target) <span class="co"># additionally remove enemy occupancy from target</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Handle Promotions</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> move.promoted_piece <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>            new_state.bitboards[move.piece] <span class="op">=</span> pop_bit(new_state.bitboards[move.piece], move.source)</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>            new_state.bitboards[move.promoted_piece] <span class="op">=</span> set_bit(new_state.bitboards[move.promoted_piece], move.target)</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>            new_state.former_pawns <span class="op">=</span> set_bit(new_state.former_pawns, move.target)</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>            new_state.bitboards[move.piece] <span class="op">=</span> set_bit(pop_bit(new_state.bitboards[move.piece], move.source), move.target) <span class="co"># move piece</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>        new_state.occupancies[new_state.side] <span class="op">=</span> pop_bit(new_state.occupancies[new_state.side], move.source) <span class="co"># remove occupancy from source</span></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>        new_state.occupancies[new_state.side] <span class="op">=</span> set_bit(new_state.occupancies[new_state.side], move.target) <span class="co"># set occupancy on target </span></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Move former pawn </span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> get_bit(new_state.former_pawns, move.source):</span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>            new_state.former_pawns <span class="op">=</span> set_bit(pop_bit(new_state.former_pawns, move.source), move.target) <span class="co"># move piece</span></span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>    new_state.side <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> new_state.side</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> new_state</span></code></pre></div>
+<h1 id="checks-and-legal-moves">Checks and Legal Moves</h1>
+<p>Currently our move generation doesn’t care about checks. It will
+happily generate moves for all pieces even if the King is currently in
+check. In chess programming, there are two approaches 1. Generating
+Legal moves from the outset 2. Generating Pseudolegal moves, playing
+them to detect if they are illegal and then pruning if so</p>
+<p>The second approach is simpler but we are wasting work generating
+illegal moves. It is fairly complex to purely generate Legal moves.
+Suppose the King is in check. Filtering to only King moves is
+insufficient because other pieces may block or capture the threat. Even
+in cases where the King is not in check, certain piece moves are illegal
+because they are pinned.</p>
+<p>Consider the situation when it is White (represented in capital
+letters) to play</p>
+<pre><code>  4  . . . k
+  3  . m . .
+  2  . W . .
+  1  K . . .
+
+     a b c d
+     </code></pre>
+<p>Wazir to c2 would actually be an illegal move because it unblocks the
+enemy Ma leaving the White King in check after white’s turn.</p>
+<p>In contrast, playing the moves and computing check is simple. Check
+is when the union of the enemies’ attack masks intersects with our
+King’s bitboard.</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> detect_check(game_state: GameState, side: <span class="bu">int</span>):</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    attack_mask <span class="op">=</span> enemy_attack_mask(game_state, side)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">bool</span>(attack_mask <span class="op">&amp;</span> game_state.bitboards[Piece.K <span class="cf">if</span> side <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> Piece.k]) </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_legal_moves(game_state):</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> move <span class="kw">in</span> generate_moves(game_state):</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> detect_check(make_move(move, game_state), game_state.side):</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">yield</span> move</span></code></pre></div>
+<h1 id="perft">Perft</h1>
+<p>Chess Programming Wiki: <a
+href="https://www.chessprogramming.org/Perft"
+class="uri">https://www.chessprogramming.org/Perft</a></p>
+<p>We can run <code>generate_legal_moves</code>, apply those moves and
+to those new positions continue recursively to see how many moves are
+possible at various depths.</p>
+<p>With my Python implementation it can reach a depth of 6-ply before it
+starts to get really slow.</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> perft(game_state: GameState, depth: <span class="bu">int</span>):</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> depth <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> move <span class="kw">in</span> generate_legal_moves(game_state):</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>        count <span class="op">+=</span> perft(make_move(move, game_state), depth <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">7</span>):</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(i, perft(default_game_state(), i))</span></code></pre></div>
+<pre><code>0 1
+1 6
+2 33
+3 246
+4 1939
+5 17231
+6 153180</code></pre>
+</body>
+</html>
