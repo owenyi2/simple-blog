@@ -2,3 +2,5 @@
 
 site/
 md_ready/
+
+*.sw*
