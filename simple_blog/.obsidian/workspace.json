@@ -4,17 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "989880107ced89d1",
+        "id": "3025a38207afe536",
         "type": "tabs",
         "children": [
           {
-            "id": "40f31bc4d19b52ac",
+            "id": "3184b14f6bb32718",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "orgmode",
+              "state": {
+                "file": "Emacs Org Mode to Replace VSCode + Jupyter.org"
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Emacs Org Mode to Replace VSCode + Jupyter"
             }
           }
         ]
@@ -180,13 +182,16 @@
       "file-cleaner-redux:Clean files": false
     }
   },
-  "active": "40f31bc4d19b52ac",
+  "active": "d6ed91d4b4ad40fe",
   "lastOpenFiles": [
+    "emacs_org_mode_to_replace_vscode_plus_jupyter.org",
+    "Emacs Org Mode to Replace VSCode + Jupyter.org",
+    "Tinyhouse Chess Engine Part I - Introduction.md",
+    "index.md",
     "Using Interactive Broker's TWSAPI.md",
     "Tinyhouse Chess Engine Part II - Move Generation.md",
-    "Tinyhouse Chess Engine Part I - Introduction.md",
     "Diffusion Example in PyTorch.md",
-    "Index.md",
+    "Attachments/emacs_org_mode_to_replace_vscode_plus_jupyter_plot.png",
     "Attachments/Tinyhouse Chess Engine Part I - Introduction-1773622497561.webp",
     "Attachments/Tinyhouse Chess Engine Part I - Introduction-1773622469860.webp",
     "Attachments/Diffusion Example in PyTorch-1773538525951.webp",
@@ -196,8 +201,10 @@
     "Attachments/Diffusion Example in PyTorch-1773538456623.webp",
     "Attachments/Diffusion Example in PyTorch-1773538432190.webp",
     "Attachments/Diffusion Example in PyTorch-1773538381038.webp",
-    "Attachments/Diffusion Example in PyTorch-1773538364744.webp",
     "Attachments",
+    "#emacs_org_mode_to_replace_vscode_plus_jupyter.org#",
+    "emacs_org_mode_to_replace_vscode_plus_jupyter.org~",
+    "emacs_org_mode_to_replace_vscode_plus_jupyter.html",
     "Untitled",
     "Welcome.md"
   ]

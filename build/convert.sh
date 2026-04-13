@@ -22,6 +22,20 @@ find build/md_ready -name "*.md" -print0 | while IFS= read -r -d '' f; do
         --mathjax
 done
 
+echo "Converting Org to HTML..."
+# TODO: add script to clean Emacs autosave files before running this conversion
+find simple_blog -name "*.org" -print0 | while IFS= read -r -d '' f; do
+    out_file="site/${f#simple_blog/}"
+    out_file="${out_file}.html"
+    mkdir -p "$(dirname "$out_file")"
+    pandoc "$f" -o "$out_file" \
+        -f org \
+        --standalone \
+        --highlight-style=breezeDark \
+        --include-in-header=styles \
+        --mathjax
+done
+
 # 4️⃣ Copy Attachments/Assets
 echo "Copying attachments..."
 if [ -d "simple_blog/Attachments" ]; then
