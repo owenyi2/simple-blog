@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Emacs Org Mode to Replace VSCode + Jupyter</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        background-color: #232629;
+        color: #7a7c7d;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
+    div.sourceCode
+      { color: #cfcfc2; background-color: #232629; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #cfcfc2; } /* Normal */
+    code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+    code span.an { color: #3f8058; } /* Annotation */
+    code span.at { color: #2980b9; } /* Attribute */
+    code span.bn { color: #f67400; } /* BaseN */
+    code span.bu { color: #7f8c8d; } /* BuiltIn */
+    code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #3daee9; } /* Char */
+    code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+    code span.co { color: #7a7c7d; } /* Comment */
+    code span.cv { color: #7f8c8d; } /* CommentVar */
+    code span.do { color: #a43340; } /* Documentation */
+    code span.dt { color: #2980b9; } /* DataType */
+    code span.dv { color: #f67400; } /* DecVal */
+    code span.er { color: #da4453; text-decoration: underline; } /* Error */
+    code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+    code span.fl { color: #f67400; } /* Float */
+    code span.fu { color: #8e44ad; } /* Function */
+    code span.im { color: #27ae60; } /* Import */
+    code span.in { color: #c45b00; } /* Information */
+    code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+    code span.op { color: #cfcfc2; } /* Operator */
+    code span.ot { color: #27ae60; } /* Other */
+    code span.pp { color: #27ae60; } /* Preprocessor */
+    code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+    code span.sc { color: #3daee9; } /* SpecialChar */
+    code span.ss { color: #da4453; } /* SpecialString */
+    code span.st { color: #f44f4f; } /* String */
+    code span.va { color: #27aeae; } /* Variable */
+    code span.vs { color: #da4453; } /* VerbatimString */
+    code span.wa { color: #da4453; } /* Warning */
+  </style>
+  <!-- "pandoc -H file" option embeds the text from "file" directly. So this is a file with CSS but wrapped in HTML <style> tags. Don't @ me. Actually do @ me if you have a nice **simple** fix because this also hurts my aesthetic sensibilities -->
+  <style>
+  /* Justify text */
+  body {
+      text-align: justify;
+  }
+  h2, h3, h4, h5, h6 {
+      text-align: left;
+  }
+
+  /* Give Code Blocks more margin */
+  pre {
+      margin: 20px 0; /* top & bottom margin */
+      padding: 15px;  /* internal padding for readability */
+      background-color: #f5f5f5; /* optional: light gray background */
+      border-radius: 5px; /* optional: rounded corners */
+      overflow-x: auto;  /* horizontal scroll if code is long */
+  }
+
+  /* Inline code styling */
+  code {
+      padding: 2px 4px;
+      background-color: #eee;
+      border-radius: 3px;
+      line-height: 1.4;     /* spacing for inline code */
+  }
+
+  </style>
+</head>
+<body>
+<h1 id="replacing-vscode-jupyter-with-emacs-org-mode">Replacing VSCode +
+Jupyter with Emacs + Org Mode</h1>
+<p>Before, I would use VSCode for viewing/editing/running Jupyter
+notebooks. This is because ".ipynb" files are really just large JSON
+blocks rather than just plaintext code + output. This is annoying
+because I consider VSCode as a sub-par editor and I would much rather
+use Vim. The other issue with ".ipynb" files being JSON is that it
+integrates badly with <code>git</code>. Even re-running a code block
+will cause a change in the ".ipynb" file by virtue of the fact that the
+"execution-count" field for that block has incremented and this causes a
+spurious diff.</p>
+<p>I found Emacs + Org mode as a satisfactory replacement.</p>
+<h1 id="helloworld">Helloworld</h1>
+<div class="sourceCode" id="cb1" data-results="output"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Helloworld&quot;</span>)</span></code></pre></div>
+<h1 id="minimal-emacs-configuration">Minimal Emacs Configuration</h1>
+<p>The main packages you will need are</p>
+<ul>
+<li><code>org</code>
+<ul>
+<li><code>org-tempo</code> for templating</li>
+<li><code>org-babel</code> for code execution</li>
+</ul></li>
+<li><code>pyvenv</code>
+<ul>
+<li>Activating virtual environments from inside Emacs</li>
+</ul></li>
+</ul>
+<p>I also need Evil mode because I use Vim (btw).</p>
+<p><code>/Users/owenyi/.emacs.d/init.el</code></p>
+<pre class="elisp"><code>;; -*- lexical-binding: t; -*-
+
+; Package Management
+(require &#39;package)
+(add-to-list &#39;package-archives &#39;(&quot;melpa&quot; . &quot;https://melpa.org/packages/&quot;) t)
+(package-initialize)
+;; Bootstrap use-package
+(unless (package-installed-p &#39;use-package)
+  (package-refresh-contents)
+  (package-install &#39;use-package))
+
+(require &#39;use-package)
+(setq use-package-always-ensure t)
+
+; json 
+(require &#39;json)
+
+; Theme
+(use-package gruvbox-theme
+  :config
+  (load-theme &#39;gruvbox-dark-medium t))
+
+; Basics
+(setq inhibit-startup-message t)
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+
+(global-visual-line-mode 1)
+
+(setq display-line-numbers-type &#39;relative)
+(global-display-line-numbers-mode +1)
+
+(fset &#39;yes-or-no-p &#39;y-or-n-p)
+
+; Evil Mode
+(setq evil-want-keybinding nil)
+
+(use-package evil
+  :ensure t
+  :config
+  (evil-mode 1))
+
+(setq line-move-visual nil) ;; make gg and G more consistent
+
+(use-package evil-collection ;; override all major modes
+  :after evil
+  :config
+  (evil-collection-init))
+
+(evil-ex-define-cmd &quot;Ex&quot; &#39;dired) ;; Ex -&gt; dired
+
+; Focus on new splits when created
+
+(defun split-and-follow-horizontally ()
+  (interactive)
+  (split-window-below)
+  (other-window 1))
+
+(defun split-and-follow-vertically ()
+  (interactive)
+  (split-window-right)
+  (other-window 1))
+
+(global-set-key (kbd &quot;C-x 2&quot;) &#39;split-and-follow-horizontally)
+(global-set-key (kbd &quot;C-x 3&quot;) &#39;split-and-follow-vertically)
+
+(evil-ex-define-cmd &quot;sp&quot;  &#39;split-and-follow-horizontally)
+(evil-ex-define-cmd &quot;vsp&quot; &#39;split-and-follow-vertically)
+
+
+; vterm
+
+(use-package vterm
+  :ensure t)
+
+; Org mode
+(use-package org
+  :config
+  ;; Enable syntax highlighting for code blocks
+  (setq org-src-fontify-natively t)
+  ;; Don&#39;t ask to confirm evaluation of code blocks
+  (setq org-confirm-babel-evaluate nil)
+  ;; Enable indentation
+  (setq org-src-tab-acts-natively t)
+  ;; Enable tempo so &lt;s TAB&gt; works
+  (require &#39;org-tempo)
+  ;; Add custom template for Python session blocks
+  (add-to-list &#39;org-structure-template-alist
+               &#39;(&quot;sp&quot; . &quot;src python :results output :session main&quot;))
+  (add-to-list &#39;org-structure-template-alist
+             &#39;(&quot;spf&quot; . &quot;src python :results output file link :session main&quot;))
+
+  )
+
+;; Enable Python in Org Babel
+(with-eval-after-load &#39;org
+  (org-babel-do-load-languages
+   &#39;org-babel-load-languages
+   &#39;((python . t)))
+  (setq org-babel-python-command &quot;python3&quot;))  ;; or &quot;ipython --simple-prompt -i&quot;
+
+(add-hook &#39;org-babel-after-execute-hook &#39;org-redisplay-inline-images) ; inline images
+
+;; Wrap org babel python code in try except block to show traceback
+(defun my/org-babel-python-evaluate
+    (orig session body &amp;optional result-type result-params preamble async
+          graphics-file)
+  &quot;This is the :around advice.&quot;
+  (let ((body (format &quot;\
+try:
+%s
+except Exception as e:
+   import traceback
+   traceback.print_exc()
+&quot;
+                      (org-babel-python--shift-right body 3))))
+    (funcall orig session body result-type result-params preamble
+             async graphics-file)))
+(advice-add #&#39;org-babel-python-evaluate 
+            :around
+            #&#39;my/org-babel-python-evaluate)
+
+
+; pyvenv
+(use-package pyvenv
+  :ensure t
+  :config
+  (pyvenv-mode 1))
+
+; ===
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won&#39;t work right.
+ &#39;(package-selected-packages &#39;(evil-collection gruvbox-theme ob-python pyvenv vterm)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won&#39;t work right.
+ )
+</code></pre>
+<h1 id="high-level-workflow">High Level Workflow</h1>
+<h2 id="activating-a-virtual-environment">Activating a Virtual
+Environment</h2>
+<p>Create a python virtual environment in an integrated terminal or
+shell e.g. with my config I can run <code>:vsp</code> followed by
+<code>:vterm</code> to bring up the vterm terminal emulator in a new
+buffer and execute <code>python3 -m venv .venv</code>.</p>
+<p>Activate the virtual environment with <code>pyvenv</code>. Execute
+<code>M-x pyvenv-activate RET location/of/your/.venv</code>.</p>
+<h2 id="create-a-code-block">Create a Code Block</h2>
+<p><code>&lt;sp TAB</code> is the shortcut I defined in my "init.el"
+using org-tempo to create a python code block.</p>
+<pre class="example"><code>
+#+begin_src python :results output :session main
+
+#+end_src
+
+</code></pre>
+<p>I like to import <code>sys</code> and <code>os</code> libraries to
+also print the location of the python executable being used and the
+current working directory respectively.</p>
+<div class="sourceCode" id="cb4" data-results="output"
+data-session="main"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sys.executable)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(os.getcwd())</span></code></pre></div>
+<h2 id="executing-code">Executing Code</h2>
+<p>Execute the code block by doing <code>C-c C-c</code>. Helpful
+shortcuts are listed below.</p>
+<ul>
+<li><code>C-c C-c</code> to do
+<code>M-x org-babel-execute-src-block</code></li>
+<li><code>C-c C-v C-b</code> to do
+<code>M-x org-babel-execute-buffer</code>
+<ul>
+<li>equivalent of run all</li>
+</ul></li>
+<li><code>C-c C-v C-n</code> to do
+<code>M-x org-babel-next-src-block</code></li>
+<li><code>C-c C-v C-p</code> to do
+<code>M-x org-babel-previous-src-block</code></li>
+</ul>
+<p>In Jupyter, variables are shared between blocks. Use the
+<code>:session main</code> header to achieve the equivalent behaviour.
+You can define multiple sessions e.g. <code>:session foo</code> creates
+another session called "foo".</p>
+<h2 id="deletingrestarting-a-session">Deleting/Restarting a session</h2>
+<p>Each session creates a new buffer. Run <code>M-x buffer-menu</code>
+to bring up the buffer list. Here's an example</p>
+<pre class="text"><code>CRM Buffer                    Size Mode             File
+.%* *vterm*                    140 VTerm            
+  * emacs_org_mode_to_replace_vscode_plus_jupyter.org    6935 Org         emacs_org_mode_to_replace_vscode_plus_jupyter.org
+  * *main*                     253 Inferior Python:run 
+    init.el                   3746 ELisp/l          ~/.emacs.d/init.el
+ %  .emacs.d                   521 Dired by name    ~/.emacs.d/
+  * *Org-Babel Error Output*       0 Compilation      
+  * *scratch*                  146 Lisp Interaction 
+ %* *Messages*               21150 Messages         
+ %* *Async-native-compile-log*     108 elisp-compile    
+  * *foo*                      530 Inferior Python:run 
+</code></pre>
+<ul>
+<li>Observe the <code>*main*</code> and <code>*foo*</code> buffers which
+have Mode as "Inferior Python…". You can delete a session by deleting
+the associated buffer e.g. using <code>M-x kill-buffer</code>.</li>
+</ul>
+<h2 id="graphics">Graphics</h2>
+<div class="sourceCode" id="cb6" data-results="output"
+data-session="main"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib <span class="im">as</span> mpl</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>mpl.use(<span class="st">&quot;Agg&quot;</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span></code></pre></div>
+<div class="sourceCode" id="cb7" data-results="output file link"
+data-session="main"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plot_folder <span class="op">=</span> Path(<span class="st">&quot;Attachments&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>plot_folder.mkdir(exist_ok <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>filename <span class="op">=</span> plot_folder <span class="op">/</span> <span class="st">&quot;emacs_org_mode_to_replace_vscode_plus_jupyter_plot.png&quot;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">&quot;Plot&quot;</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> np.pi, <span class="dv">2</span> <span class="op">*</span> np.pi, <span class="dv">200</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span>x<span class="op">**</span><span class="dv">2</span>) <span class="op">*</span> np.cos(x)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>ax.plot(x, y)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>plt.savefig(filename)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>plt.close(<span class="st">&quot;all&quot;</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(filename)</span></code></pre></div>
+<p><img
+src="Attachments/emacs_org_mode_to_replace_vscode_plus_jupyter_plot.png"
+alt="&quot;My plot&quot;" width="600" /></p>
+<p>We specify <code>mpl.use("Agg")</code> to choose plotting backend
+that doesn't open up a GUI (we just the want the image saved to a file).
+We then specify a folder and file path to save the plot to. We then
+print the filename. The header <code>:results file link</code> converts
+the filename into an Org mode link (which is just text surrounded by two
+square brackets). Org mode follows the link and embeds the image because
+we added the hook in our "init.el"
+<code>(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)</code>.</p>
+<h1 id="understanding-headers">Understanding Headers</h1>
+<p>Further reading:</p>
+<ul>
+<li><a
+href="https://www.gnu.org/software/emacs/manual/html_node/org/Using-Header-Arguments.html">https://www.gnu.org/software/emacs/manual/html_node/org/Using-Header-Arguments.html</a></li>
+<li><a
+href="https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html">https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html</a></li>
+</ul>
+<p><code>:session main</code> creates/uses a session called "main"</p>
+<p>If session is unspecified the following hold</p>
+<ul>
+<li><code>:results output</code> tells Org mode to grab stdout and embed
+that in the results. As such you would need to call <code>print()</code>
+at some point to see output.</li>
+<li><code>:results value</code> tells Org mode to wrap the code block
+inside a function block and embed the output of that function. As such
+you need a <code>return</code> statement at the end</li>
+</ul>
+<p>If session is specified, the behaviour is slightly different. The way
+session works is it opens a Python REPL so instead of reading from
+stdout, it reads what is printed out.</p>
+<p><code>:results file link</code> tells Org mode to wrap the output
+inside square brackets to produce an org mode link.</p>
+<h1 id="rough-edges">Rough Edges</h1>
+<h2 id="error-messages">Error Messages</h2>
+<p>Trying to get error messages to be printed was a pain in the ass. The
+approach I settled on was to wrap each code block in a try except
+block.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>   <span class="im">import</span> traceback</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>   traceback.print_exc() </span></code></pre></div>
+<p>More information: <a
+href="https://emacs.stackexchange.com/questions/79162/org-babel-python-code-block-not-showing-errors-during-execution">https://emacs.stackexchange.com/questions/79162/org-babel-python-code-block-not-showing-errors-during-execution</a></p>
+<h2 id="infinite-loops">Infinite Loops</h2>
+<div class="sourceCode" id="cb9" data-results="output"
+data-session="main"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">pass</span></span></code></pre></div>
+<p>Infinite loops cause the entire Emacs application to freeze. Run
+<code>C-g</code> a couple times to break out of the loop.</p>
+<h2 id="indentation">Indentation</h2>
+<p>The auto-indentation is a bit janky especially for multiline
+statements.</p>
+<div class="sourceCode" id="cb10" data-results="output"
+data-session="main"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;a&quot;</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;b&quot;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;c&quot;</span>)</span></code></pre></div>
+<p>Move cursor behind the "a" and everytime you press enter Emacs
+indents everything forward.</p>
+<h1 id="other-notes">Other Notes</h1>
+<p>Use <code>C-x C-f</code> to create file. When Emacs minibuffer prompt
+you with a default, you can clear it with <code>C-a C-k</code> (go to
+start + kill line).</p>
+<h2 id="more-short-cuts">More short cuts</h2>
+<p>Switching buffers</p>
+<ul>
+<li><code>C-x &lt;left&gt;</code> previous buffer</li>
+<li><code>C-x &lt;right&gt;</code> next buffer</li>
+<li><code>C-x C-b</code> list buffers</li>
+<li><code>C-x b</code> switch to buffer</li>
+</ul>
+<p>Jumping between headings</p>
+<ul>
+<li><code>C-c C-n</code> next heading</li>
+<li><code>C-c C-p</code> previous heading</li>
+</ul>
+</body>
+</html>
