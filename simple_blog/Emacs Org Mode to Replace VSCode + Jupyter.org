@@ -1,4 +1,5 @@
-* Replacing VSCode + Jupyter with Emacs + Org Mode
+#+TITLE: Replacing VSCode + Jupyter with Emacs + Org Mode
+#+DATE: 2026-04-13
 
 Before, I would use VSCode for viewing/editing/running Jupyter notebooks. This is because ".ipynb" files are really just large JSON blocks rather than just plaintext code + output. This is annoying because I consider VSCode as a sub-par editor and I would much rather use Vim. The other issue with ".ipynb" files being JSON is that it integrates badly with ~git~. Even re-running a code block will cause a change in the ".ipynb" file by virtue of the fact that the "execution-count" field for that block has incremented and this causes a spurious diff.
 
