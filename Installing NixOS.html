@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2026-04-16" />
+  <title>Installing NixOS</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        background-color: #232629;
+        color: #7a7c7d;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
+    div.sourceCode
+      { color: #cfcfc2; background-color: #232629; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #cfcfc2; } /* Normal */
+    code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+    code span.an { color: #3f8058; } /* Annotation */
+    code span.at { color: #2980b9; } /* Attribute */
+    code span.bn { color: #f67400; } /* BaseN */
+    code span.bu { color: #7f8c8d; } /* BuiltIn */
+    code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #3daee9; } /* Char */
+    code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+    code span.co { color: #7a7c7d; } /* Comment */
+    code span.cv { color: #7f8c8d; } /* CommentVar */
+    code span.do { color: #a43340; } /* Documentation */
+    code span.dt { color: #2980b9; } /* DataType */
+    code span.dv { color: #f67400; } /* DecVal */
+    code span.er { color: #da4453; text-decoration: underline; } /* Error */
+    code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+    code span.fl { color: #f67400; } /* Float */
+    code span.fu { color: #8e44ad; } /* Function */
+    code span.im { color: #27ae60; } /* Import */
+    code span.in { color: #c45b00; } /* Information */
+    code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+    code span.op { color: #cfcfc2; } /* Operator */
+    code span.ot { color: #27ae60; } /* Other */
+    code span.pp { color: #27ae60; } /* Preprocessor */
+    code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+    code span.sc { color: #3daee9; } /* SpecialChar */
+    code span.ss { color: #da4453; } /* SpecialString */
+    code span.st { color: #f44f4f; } /* String */
+    code span.va { color: #27aeae; } /* Variable */
+    code span.vs { color: #da4453; } /* VerbatimString */
+    code span.wa { color: #da4453; } /* Warning */
+  </style>
+  <!-- "pandoc -H file" option embeds the text from "file" directly. So this is a file with CSS but wrapped in HTML <style> tags. Don't @ me. Actually do @ me if you have a nice **simple** fix because this also hurts my aesthetic sensibilities -->
+  <style>
+  /* Justify text */
+  body {
+      text-align: justify;
+  }
+  h2, h3, h4, h5, h6 {
+      text-align: left;
+  }
+
+  /* Give Code Blocks more margin */
+  pre {
+      margin: 20px 0; /* top & bottom margin */
+      padding: 15px;  /* internal padding for readability */
+      background-color: #f5f5f5; /* optional: light gray background */
+      border-radius: 5px; /* optional: rounded corners */
+      overflow-x: auto;  /* horizontal scroll if code is long */
+  }
+
+  /* Inline code styling */
+  code {
+      padding: 2px 4px;
+      background-color: #eee;
+      border-radius: 3px;
+      line-height: 1.4;     /* spacing for inline code */
+  }
+
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Installing NixOS</h1>
+<p class="date">2026-04-16</p>
+</header>
+<h1 id="installation">Installation</h1>
+<p>The installation is fairly standard, feel free to skip this section.
+This part not a guide. This section is about how I almost bricked my
+laptop.</p>
+<p>Resources:</p>
+<ul>
+<li><p>Official Installation Manual <a
+href="https://nixos.org/manual/nixos/stable/index.html#ch-installation"
+class="uri">https://nixos.org/manual/nixos/stable/index.html#ch-installation</a></p></li>
+<li><p>Another installation guide?: <a
+href="https://nixos.wiki/wiki/NixOS_Installation_Guide"
+class="uri">https://nixos.wiki/wiki/NixOS_Installation_Guide</a></p>
+<ul>
+<li>I followed this one</li>
+</ul></li>
+<li><p>NixOS download: <a href="https://nixos.org/download/"
+class="uri">https://nixos.org/download/</a></p></li>
+</ul>
+<p>My old Lenovo laptop had Windows and Ubuntu dual-booted. My goal was
+to also boot NixOS on this laptop. The plan was to shrink the Ubuntu
+partition and use the free space to install NixOS.</p>
+<h2 id="burning-the-iso-onto-a-usb">Burning the ISO onto a USB</h2>
+<p>I downloaded the NixOS minimal installation <code>.iso</code> file.
+Run <a
+href="https://www.man7.org/linux/man-pages/man8/lsblk.8.html"><code>lsblk</code></a>
+to get something like</p>
+<pre><code>NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINT  
+sda 8:0 0 465.8G 0 disk  
+├─sda1 8:1 0 500M 0 part /boot  
+├─sda2 8:2 0 50.0G 0 part /  
+└─sda3 8:3 0 415.3G 0 part /home  
+sdb 8:16 1 16G 0 disk  
+└─sdb1 8:17 1 16G 0 part /media/usb</code></pre>
+<p>My USB device is identified as <code>sdb</code> so I would run the <a
+href="https://www.man7.org/linux/man-pages/man8/lsblk.8.html"><code>dd</code></a>
+command to burn the image onto the USB. This step took like 30 minutes.
+Also it is normal if at the end it stalls.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dd</span> if=path/to/nixos.iso of=/dev/sdb bs=4M status=progress conv=fdatasync</span></code></pre></div>
+<h2 id="partitioning">Partitioning</h2>
+<h3 id="initial-faffing-about">Initial faffing about</h3>
+<p>I first tried shrinking the Ubuntu partition from inside Ubuntu using
+<code>gparted</code>. Turns out you can’t resize the partition that you
+are currently booting from. (Which sounds obvious in retrospect). So
+instead, I booted from the USB and ran <a
+href="https://www.man7.org/linux/man-pages/man8/parted.8.html"><code>parted</code></a>.
+I am greeted by a interactive prompt like so</p>
+<pre><code>[nixos@nixos:~]$ sudo parted
+GNU Parted 3.5
+Using /dev/sda
+Welcome to GNU Parted! Type &#39;help&#39; to view a list of commands.
+(parted) </code></pre>
+<p>Running the <code>print</code> command after the prompt gave me
+something like this</p>
+<pre><code>(parted) print
+Model: ATA TOSHIBA 
+Disk /dev/sda: 500GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: msdos
+Disk Flags:
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  524MB   523MB   primary  ntfs 
+ 2      524MB   266GB   266GB   primary  ntfs 
+ 3      266GB   267GB   537MB   primary  fat32        boot, esp
+ 4      267GB   500GB   133GB   extended
+ 5      267GB   500GB   133GB   logical
+(parted)</code></pre>
+<ul>
+<li><p>Partition 2 is my Windows partition. “ntfs” is a Windows file
+system. Partition 1 is probably some auxiliary windows partition maybe a
+boot partition or something</p></li>
+<li><p>Partition 5 contained my Ubuntu partition</p></li>
+</ul>
+<p>At first I tried to run <code>resizepart 4 100GB</code> which gave an
+error. Turns out the 3rd argument should be the new End rather than the
+desired size. After resizing it to the correct end, I tried to run <a
+href="https://www.man7.org/linux/man-pages/man8/resize2fs.8.html"><code>resize2fs</code></a>
+and I encountered a loop like in this post <a
+href="https://unix.stackexchange.com/questions/593908/how-to-recover-filesystem-and-physical-size-mismatch"
+class="uri">https://unix.stackexchange.com/questions/593908/how-to-recover-filesystem-and-physical-size-mismatch</a>.</p>
+<p>Running <code>resize2fs</code> gave the error</p>
+<pre><code>resize2fs: Can&#39;t read a block bitmap while trying to resize /dev/sda3
+Please run &#39;e2fsck -fy /dev/sda3&#39; to fix the filesystem
+after the aborted resize operation.</code></pre>
+<p>and running <a
+href="https://www.man7.org/linux/man-pages/man8/e2fsck.8.html"><code>e2fsck</code></a>,
+gave the error</p>
+<pre><code>The filesystem size (according to the superblock) is 186122240 blocks
+The physical size of the device is 159907584 blocks
+Either the superblock or the partition table is likely to be corrupt!
+Abort&lt;y&gt;? </code></pre>
+<p>Essentially the filesystem resides within a partition. In order to
+safely shrink a partition, one must shrink the filesystem inside the
+partition before shrinking the partition. Otherwise one will have
+portion of the filesystem outside the partition which 1) the filesystem
+no longer has access to and 2) could be overwritten by processes out of
+the filesystems control.</p>
+<p>One more interesting thing, while trying to undo my mistake by
+expanding the partition back to the original 500GB end, I tried to
+resize partition 5 first. Since partition 5 is a logical partition
+contained inside the physical partition 4, I had to first resize
+partition 4 and then resize partition 5.</p>
+<h3 id="what-i-was-supposed-to-do">What I was supposed to do</h3>
+<p>So basically after I expanded the partition back to 500GB, I ran the
+following correct sequence</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> e2fsck <span class="at">-f</span> /dev/sda5</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> resize2fs /dev/sda5 133G </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> parted /dev/sda  </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">parted</span><span class="kw">)</span> <span class="ex">resizepart</span> 5 400GB</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">parted</span><span class="kw">)</span> <span class="ex">quit</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> e2fsck <span class="at">-f</span> /dev/sda5</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> parted /dev/sda  </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">parted</span><span class="kw">)</span> <span class="ex">mkpart</span> logical ext4 400GB 500GB</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">parted</span><span class="kw">)</span> <span class="ex">quit</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> e2fsck <span class="at">-f</span> /dev/sda6</span></code></pre></div>
+<h2 id="mounting">Mounting</h2>
+<p>This part went fairly smoothly. I run the <a
+href="https://www.man7.org/linux/man-pages/man8/mount.8.html"><code>mount</code></a>
+command to attach the <code>/mnt</code> folder in the USB to the newly
+created partition <code>/dev/sda6</code>.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount /dev/sda6 /mnt</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /mnt/boot</span></code></pre></div>
+<p>I followed this commands to create a swapfile</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dd if=/dev/zero of=/mnt/.swapfile bs=1024 count=2097152 <span class="co"># 2GB size</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 600 /mnt/.swapfile</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkswap /mnt/.swapfile</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> swapon /mnt/.swapfile</span></code></pre></div>
+<h2 id="creating-a-nixos-configuration">Creating a NixOS
+configuration</h2>
+<p>Our first NixOS command is to create a config.
+<code>sudo nixos-generate-config --root /mnt</code>. This creates a
+default <code>configuration.nix</code> file inside
+<code>/mnt/etc/nixos/configuration.nix</code>.</p>
+<p>A large part of time configuring NixOS will be spend modifying
+<code>.nix</code> files from within the <code>/etc/nixos/</code>
+folder.</p>
+<p>Run <code>sudo -e /mnt/etc/nixos/configuration.nix</code> to edit the
+file. Nano was the default editor that came up. I installed Vim shortly
+after.</p>
+<p>Some things to configure</p>
+<ul>
+<li><p>Adding a user</p></li>
+<li><p>Configuring boot loader</p></li>
+</ul>
+<p>I had a couple small issues with configuring the bootloader.
+Initially I left <code>boot.loader.grub.efiSupport = true</code> and
+<code>boot.loader.grub.device = "nodev"</code>. NixOS didn’t boot. To
+check if I had EFI support I booted Ubuntu and ran
+<code>ls /sys/firmware/efi</code>. Since that folder was not found, it
+meant my computer didn’t have EFI. Disabling the option fixed it. The
+next issue I had was on the NixOS boot screen I couldn’t find the option
+to boot Ubuntu or Windows. The fix was to enable
+<code>boot.loader.grub.useOSProber = true</code>. This allows the boot
+loader to look for other operating systems to boot.</p>
+<p>“configuration.nix”:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a user!</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  users<span class="op">.</span>users<span class="op">.</span>owenyi = <span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">isNormalUser</span> <span class="op">=</span> <span class="cn">true</span><span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">extraGroups</span> <span class="op">=</span> <span class="op">[</span> <span class="st">&quot;wheel&quot;</span> <span class="op">];</span> <span class="co"># Sudo access</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="va">home</span> <span class="op">=</span> <span class="st">&quot;/home/owenyi&quot;</span><span class="op">;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Use th eGRUB 2 boot loader.</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  boot<span class="op">.</span>loader<span class="op">.</span>grub<span class="op">.</span>enable = <span class="cn">true</span>;</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  boot<span class="op">.</span>loader<span class="op">.</span>grub<span class="op">.</span>efiSupport = <span class="cn">false</span>;</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  boot<span class="op">.</span>loader<span class="op">.</span>grub<span class="op">.</span>useOSProber = <span class="cn">true</span>;</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  boot<span class="op">.</span>loader<span class="op">.</span>grub<span class="op">.</span>device = <span class="st">&quot;/dev/sda&quot;</span>;</span></code></pre></div>
+<h3 id="installing-vim">Installing Vim</h3>
+<p>First connect to WiFi by running. From the TUI select connection and
+enter WiFi password.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start NetworkManager  </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable NetworkManager</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nmtui</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># activate connection -&gt; choose wifi -&gt; enter password</span></span></code></pre></div>
+<p>Add the following lines</p>
+<p>“configuration.nix”:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>environment<span class="op">.</span>systemPackages = <span class="kw">with</span> pkgs<span class="op">;</span> <span class="op">[</span> vim <span class="op">]</span>;</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>environment<span class="op">.</span>variables<span class="op">.</span>EDITOR = <span class="st">&quot;vim&quot;</span>;</span></code></pre></div>
+<p>This installs Vim and also makes it so when I run
+<code>sudo -e</code>, the editor that opens is Vim and not Nano.</p>
+<h2 id="finish-installation">Finish Installation</h2>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /mnt</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nixos-install</span></code></pre></div>
+<h1 id="initial-configuring">Initial Configuring</h1>
+<h2 id="flakes">Flakes</h2>
+<p>Further reading: <a
+href="https://nixos-and-flakes.thiscute.world/nixos-with-flakes/start-using-home-manager"
+class="uri">https://nixos-and-flakes.thiscute.world/nixos-with-flakes/start-using-home-manager</a></p>
+<p>Inside <code>/etc/nixos</code>, we create a <code>flake.nix</code>
+file. If you have used Rust before, a
+<code>flake.nix</code>/<code>flake.lock</code> is analogous to a
+<code>Cargo.toml</code>/<code>Cargo.lock</code>. Our
+<code>flake.nix</code> will call our <code>configuration.nix</code> but
+also specify which version of Nixpkgs to use.</p>
+<p>Flakes are an experimental feature so to turn it on we need to write
+in our <code>configuration.nix</code></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>nix<span class="op">.</span>settings<span class="op">.</span>experimental<span class="op">-</span>features = <span class="op">[</span> <span class="st">&quot;nix-command&quot;</span> <span class="st">&quot;flakes&quot;</span> <span class="op">]</span></span></code></pre></div>
+<h2 id="home-manager">Home Manager</h2>
+<p>Further reading: <a
+href="https://nixos-and-flakes.thiscute.world/nixos-with-flakes/start-using-home-manager"
+class="uri">https://nixos-and-flakes.thiscute.world/nixos-with-flakes/start-using-home-manager</a></p>
+<p>I use <code>configuration.nix</code> to specify packages and
+configurations I want applied system wide and <code>home.nix</code> to
+specify configurations to apply to just this user.</p>
+<p>With Home Manager, I can install packages like so</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>home<span class="op">.</span>packages = <span class="kw">with</span> pkgs<span class="op">;</span> <span class="op">[</span> noefetch git <span class="op">]</span>;</span></code></pre></div>
+<p>I port over my Vim config using the <code>extraConfig</code>
+attribute</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>programs<span class="op">.</span>vim = <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">enable</span> <span class="op">=</span> <span class="cn">true</span><span class="op">;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">extraConfig</span> <span class="op">=</span> <span class="st">&#39;&#39; </span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="st">        set relativenumber</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="st">        set ai</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="st">        syntax on</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="st">        // ...</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="st">    &#39;&#39;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="er">}</span></span></code></pre></div>
+<h2 id="remapping-caps-lock-to-esc">Remapping Caps Lock to Esc</h2>
+<p>Remapping Caps Lock to Esc was not very intuitive. When I searched
+this up, most results explained how to do it with Wayland or X11 but I
+needed it to work on console.</p>
+<p>You need to set <code>console.luseXkbCOnfig = true;</code> and set
+the configuration inside <code>services.xserver.xkb.options</code>
+despite having <code>services.xserver.enable = false;</code></p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>console = <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">useXkbConfig</span> <span class="op">=</span> <span class="cn">true</span><span class="op">;</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>services<span class="op">.</span>xserver = <span class="op">{</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="va">enable</span> <span class="op">=</span> <span class="cn">false</span><span class="op">;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="va">xkb</span>.<span class="va">options</span> <span class="op">=</span> <span class="st">&quot;caps:escape&quot;</span><span class="op">;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<h2 id="ssh"><code>ssh</code></h2>
+<p>Further reading: <a href="https://wiki.nixos.org/wiki/SSH"
+class="uri">https://wiki.nixos.org/wiki/SSH</a></p>
+<p>I want to be able to <code>ssh</code> onto my NixOS computer from my
+MacBook.</p>
+<p>I first set <code>services.openssh.enable = true;</code> in the
+<code>configuration.nix</code> and rebuild.The command
+<code>hostname -I</code> gives the IP address. From my Mac I can run
+<code>cat ~/.ssh/id_ed25519.pub | ssh owenyi@ip_address "mkdir -p ~/.ssh &amp;&amp; cat &gt;&gt; ~/.ssh/authorized_keys"</code>.
+Now that I’ve transferred over the <code>ssh</code> keys, I can disable
+password authentication so now only my MacBook can connect and no one
+else.</p>
+<p>On my NixOS machine I modify the “configuration.nix”:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>services<span class="op">.</span>openssh = <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">enable</span> <span class="op">=</span> <span class="cn">true</span><span class="op">;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">ports</span> <span class="op">=</span> <span class="op">[</span> <span class="dv">5432</span> <span class="op">];</span> <span class="co"># or some other port that isn&#39;t the default 22. </span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">settings</span> <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">PasswordAuthentication</span> <span class="op">=</span> <span class="cn">false</span><span class="op">;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">KbdInteractiveAuthentication</span> <span class="op">=</span> <span class="cn">false</span><span class="op">;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">PermitRootLogin</span> <span class="op">=</span> <span class="st">&quot;no&quot;</span><span class="op">;</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">AllowUsers</span> <span class="op">=</span> <span class="op">[</span> <span class="st">&quot;owenyi&quot;</span> <span class="op">];</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<p>On my MacBook I add the lines to <code>~/.ssh/config</code></p>
+<pre><code>Host nixos
+  HostName $ip_address
+  User owenyi
+  Port $same_port_as_in_nixos_config
+  IdentityFile ~/.ssh/id_ed25519</code></pre>
+<p>This way I can <code>ssh</code> with the command
+<code>ssh owenyi@nixos</code> instead of something like
+<code>ssh -p port owenyi@ip_address</code>.</p>
+<p>With <code>ssh</code> enabled, I run on my MacBook for example</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scp</span> <span class="st">&#39;owenyi@nixos:/etc/nixos/*&#39;</span> . </span></code></pre></div>
+<p>Which grabs all my nixos config files as they are now and copies them
+to my MacBook.</p>
+<h1 id="frequently-used-commands">Frequently Used Commands</h1>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nixos-rebuild</span> dry-build <span class="co"># dry run to show what packages will be downloaded</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nixos-rebuild test </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nixos-rebuild switch</span></code></pre></div>
+<p>These commands apply changes to the configuration. <code>test</code>
+applies the changes but doesn’t add a “generation”. <code>switch</code>
+applies changes and adds a “generation”. You can boot any previous
+“generation” from the boot menu.</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nix-collect-garbage <span class="at">-d</span></span></code></pre></div>
+<p>The way NixOS applies changes is by installing everything in
+<code>/nix/store</code> and symlinking the appropriate packages into the
+current environment (among other thing such as setting environment
+variables). If I remove a package from my <code>home.nix</code> or
+<code>configuration.nix</code>, the package is still stored in
+<code>/nix/store</code>. <code>nix-collect-garbage</code> will delete
+these dangling packages.</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nixos-option</span> </span></code></pre></div>
+<p>The <code>nixos-option</code> command is really great from
+discoverability aspect. This lists all the options that can be
+configured.</p>
+<p>You can traverse down the tree manually for example suppose
+<code>console</code> was in the attribute set printed above. Running
+<code>nixos-option console</code> will bring up attributes under
+<code>console</code>.</p>
+<h1 id="nix-shell"><code>nix-shell</code></h1>
+<p>Further reading:</p>
+<ul>
+<li><p><a href="https://www.youtube.com/watch?v=0YBWhSNTgV8"
+class="uri">https://www.youtube.com/watch?v=0YBWhSNTgV8</a></p></li>
+<li><p><a
+href="https://nix.dev/manual/nix/2.34/command-ref/nix-shell.html"
+class="uri">https://nix.dev/manual/nix/2.34/command-ref/nix-shell.html</a></p></li>
+</ul>
+<p>By modifying <code>configuration.nix</code>, I can install packages
+system wide. With Home Manager, I can install packages declaratively for
+the user. With the <code>nix-shell</code> command I can write a
+<code>.nix</code> file to declare the packages and environment variables
+I want set for a particular project.</p>
+<p>For example I may want to develop a Rust binary. I can
+<code>mkdir</code> and create a file</p>
+<p>“shell.nix”</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">{</span> <span class="va">pkgs</span> <span class="op">?</span> <span class="bu">import</span> &lt;nixpkgs&gt; <span class="op">{}</span> <span class="op">}</span>:</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>pkgs<span class="op">.</span>mkShell <span class="op">{</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="va">buildInputs</span> <span class="op">=</span> <span class="kw">with</span> pkgs<span class="op">;</span> <span class="op">[</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    rustc</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    cargo</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">];</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>After running <code>nix-shell shell.nix</code> Nix will download
+<code>rustc</code> and <code>cargo</code> and their dependencies and put
+them in <code>/nix/store</code>. These packages will stay in the
+<code>/nix/store</code> saving us from having to re-download every time
+we activate the environment. It will then set up all the environment
+variables such as putting
+<code>/nix/store/...-cargo-1.91.1/bin/cargo</code> into the
+<code>PATH</code> environment variable.</p>
+<p>With the shell environment I can run
+<code>cargo new helloworld</code> and have working Rust development
+environment.</p>
+<pre><code>$ which cargo
+nix/store/rlrs5m33sq6i3x3n0m2dlzacq4rvgd0a-cargo-1.91.1/bin/cargo</code></pre>
+<p>When I am done, I can run <code>exit</code> which quits the shell and
+resets the environment back to as it was before. Now if I run
+<code>cargo</code></p>
+<pre><code>$ cargo
+-bash: cargo: command not found</code></pre>
+<p>This way these packages are isolated and won’t contaminate my regular
+environment. It feels like having a Python virtual environment but for
+packages in general.</p>
+<p>Afterwards, if I want to delete those packages from
+<code>/nix/store</code>, I can just run
+<code>nix-collect-garbage -d</code>.</p>
+<p>I also tried out creating an OCaml development environment.</p>
+<p>“shell.nix”</p>
+<pre><code>{ pkgs ? import &lt;nixpkgs&gt; {} }:
+
+pkgs.mkShell {
+  buildInputs = with pkgs; [
+    ocaml
+    dune
+    opam
+    pkgs.ocamlPackages.utop
+  ];
+}</code></pre>
+<p>The <code>utop</code> REPL works perfectly fine. I can create a
+project with <code>dune</code></p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dune</span> init proj helloworld</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> helloworld  </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="ex">dune</span> build  </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="ex">dune</span> exec helloworld</span></code></pre></div>
+<p>I can also run <code>nix-shell shell.nix --pure</code> to clear out
+the original environment before building the new environment. This way I
+have extra certainty that my original shell environment will not
+interfere with my development environment.</p>
+<p>In theory, the point of Nix shells is to produce a perfectly
+reproducible and pure development environment to eliminate “it works on
+<em>my</em> machine” situations. In this case, our
+<code>shell.nix</code> is slightly impure because it inherits the
+<code>nixpkgs</code> specified by the system, so we have an implicit
+dependency. This can be fixed with flakes to pin the version of
+<code>nixpkgs</code> and make explicit other needed dependencies.</p>
+<p>But even without using flakes, I think the ability to create a
+lightweight, isolated, ephemeral environment to experiment with knowing
+it won’t contaminate or be contaminated by regular shell environment is
+really neat.</p>
+<h2 id="not-all-sunshine-and-rainbows">Not all Sunshine and
+Rainbows</h2>
+<p>We can’t expect packages to have Nix in mind. Sometimes packages will
+handle dependencies in a way that causes issues with the Nix way of
+doing things.</p>
+<p>Consider the example given in this wiki <a
+href="https://wiki.nixos.org/wiki/Python#Running_Python_packages_which_requires_compilation_and/or_contains_libraries_precompiled_without_nix"
+class="uri">https://wiki.nixos.org/wiki/Python#Running_Python_packages_which_requires_compilation_and/or_contains_libraries_precompiled_without_nix</a>.</p>
+<p>I create a “shell.nix” for Python.</p>
+<pre><code>{ pkgs ? import &lt;nixpkgs&gt; {} }:
+
+pkgs.mkShell {
+  buildInputs = with pkgs; [
+    python3
+  ];
+}</code></pre>
+<p>I then create a virtual environment and install <code>numpy</code>.
+Then when I import <code>numpy</code> I get this error.</p>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nix-shell</span> shell.nix</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> .venv/bin/activate </span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Python</span> 3.13.12 <span class="er">(</span><span class="ex">main,</span> Feb  3 2026, 17:53:27<span class="kw">)</span> <span class="ex">[GCC</span> 14.3.0] on linux</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&quot;help&quot;</span>, <span class="st">&quot;copyright&quot;</span>, <span class="st">&quot;credits&quot;</span> or <span class="st">&quot;license&quot;</span> for more information.</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> import <span class="ex">numpy</span> as np</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Traceback</span> <span class="er">(</span><span class="ex">most</span> recent call last<span class="kw">)</span><span class="bu">:</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">File</span> <span class="st">&quot;/home/owenyi/Python/.venv/lib/python3.13/site-packages/numpy/_core/__init__.py&quot;</span>, line 24, in <span class="op">&lt;</span>module<span class="op">&gt;</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="ex">from</span> . import multiarray</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="ex">File</span> <span class="st">&quot;/home/owenyi/Python/.venv/lib/python3.13/site-packages/numpy/_core/multiarray.py&quot;</span>, line 11, in <span class="op">&lt;</span>module<span class="op">&gt;</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    <span class="ex">from</span> . import _multiarray_umath, overrides</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="ex">ImportError:</span> libstdc++.so.6: cannot open shared object file: No such file or directory</span></code></pre></div>
+<p>The problem is that Python expects <code>libstdc++.so</code> to be in
+some a location like <code>/usr/lib/...</code> but Nix stores everything
+in <code>/nix/store</code> and symlinks as needed.</p>
+<p>To fix this, we need to explicitly declare the dependencies and set
+the <code>LD_LIBRARY_PATH</code> environment variable. In the
+“shell.nix” file below, I have included some common dependencies and
+specified the <code>LD_LIBRARY_PATH</code></p>
+<p>“shell.nix”</p>
+<pre><code>{ pkgs ? import &lt;nixpkgs&gt; {} }:
+
+pkgs.mkShell {
+  packages = with pkgs; [
+    python3
+    
+    # common build deps for native wheels
+    gcc
+    zlib
+    zstd
+    openssl
+    libffi
+    xz
+    curl
+  ];
+
+  LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+    pkgs.zlib
+    pkgs.zstd
+    pkgs.openssl
+    pkgs.libffi
+    pkgs.xz
+    pkgs.stdenv.cc.cc
+  ];
+}</code></pre>
+<p>I can now import <code>numpy</code> and it now works. From inside the
+nix shell I can also run</p>
+<pre><code>$ echo $LD_LIBRARY_PATH
+/nix/store/6v5hbaxvndmaf21rfyryxpn1xjkljrid-zlib-1.3.2/lib:/nix/store/00qn3vc7r4m32c072kjnrbxd86w9slzj-zstd-1.5.7/lib:/nix/store/i8qhanfxfgwnr6a4pdd9f2qyl1rgi94p-openssl-3.6.1/lib:/nix/store/6rwsi7k52chjbpxr74khmzdr5hzlc4bb-libffi-3.5.2/lib:/nix/store/ldh38gqcbfp15l04c1iw6q08qh48651h-xz-5.8.1/lib:/nix/store/1xw5xccqqh1xw3mvd70hyil6x418wxcm-gcc-14.3.0-lib/lib</code></pre>
+<p>And of course after exiting the shell, everything is cleaned up: the
+<code>LD_LIBRARY_PATH</code> is unset and running <code>python3</code>
+gives <code>command not found</code>.</p>
+<p>You might have noticed I pulled a little sleight of hand here. By
+creating the <code>nix-shell</code>, I am using the Python found in
+<code>/nix/store</code>. But as soon as I
+<code>source .venv/bin/activate</code>, I will be using the Python found
+in <code>.venv/bin</code>.</p>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> nix-shell shell.nix</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> which python3</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="ex">/nix/store/qwb5ygz9k8gs5ql9bpxbrsrv12r1icgm-python3-3.13.12/bin/python3</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> source .venv/bin/activate</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">.venv</span><span class="kw">)</span> <span class="ex">$</span> which python3</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="ex">/home/owenyi/Python/.venv/bin/python3</span></span></code></pre></div>
+<p>Which means I can freely <code>pip install</code> packages and create
+implicit dependencies making my Python builds not be reproducible. That
+is fine for sandboxing in a development environment, but this is now how
+you would want to build software the Nix way.</p>
+<h1 id="next">Next</h1>
+<p>I would like to say that on NixOS, “things just work out of the box”,
+but it is too early for me to say. So far I have only had a cursory view
+of using NixOS for development i.e. run Helloworld in Rust, OCaml and
+Python and they did work out the box (except Python but was a simple
+fix). I could imagine that for actual projects with actual dependencies,
+things might not work (like the <code>numpy</code> example but
+worse).</p>
+<p>I still need to figure out for each language, an approach to manage
+library dependencies. For example I could use Nix to specify that I need
+Python and <code>numpy</code>, but that would restrict me to the set of
+Python Packages that are in Nixpkgs rather than the full PyPi universe.
+What I would like to have is to use Nix to define the toolchain and use
+the native toolchain to declare library dependencies.</p>
+<p>So when I figure out my workflow for developing and building projects
+in NixOS, I will write about it. So far I like that</p>
+<ul>
+<li><p>Everything is declarative (or can be made declarative)</p></li>
+<li><p>I can freely sandbox packages within
+<code>nix-shell</code></p></li>
+<li><p>I can garbage collect orphaned packages when I am done</p></li>
+</ul>
+<p><img src="./Attachments/Installing%20NixOS-1776308171190.webp"
+width="700" /></p>
+</body>
+</html>

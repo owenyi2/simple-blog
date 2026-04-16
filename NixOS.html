@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2026-04-14" />
+  <title>NixOS</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <!-- "pandoc -H file" option embeds the text from "file" directly. So this is a file with CSS but wrapped in HTML <style> tags. Don't @ me. Actually do @ me if you have a nice **simple** fix because this also hurts my aesthetic sensibilities -->
+  <style>
+  /* Justify text */
+  body {
+      text-align: justify;
+  }
+  h2, h3, h4, h5, h6 {
+      text-align: left;
+  }
+
+  /* Give Code Blocks more margin */
+  pre {
+      margin: 20px 0; /* top & bottom margin */
+      padding: 15px;  /* internal padding for readability */
+      background-color: #f5f5f5; /* optional: light gray background */
+      border-radius: 5px; /* optional: rounded corners */
+      overflow-x: auto;  /* horizontal scroll if code is long */
+  }
+
+  /* Inline code styling */
+  code {
+      padding: 2px 4px;
+      background-color: #eee;
+      border-radius: 3px;
+      line-height: 1.4;     /* spacing for inline code */
+  }
+
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">NixOS</h1>
+<p class="date">2026-04-14</p>
+</header>
+<h1 id="installation">Installation</h1>
+<p>The installation is fairly standard, feel free to skip. This part not
+a guide. This part is about how I almost bricked my laptop.</p>
+<p>Resources:</p>
+<ul>
+<li><p>Official Installation Manual <a
+href="https://nixos.org/manual/nixos/stable/index.html#ch-installation"
+class="uri">https://nixos.org/manual/nixos/stable/index.html#ch-installation</a></p></li>
+<li><p>Another installation guide?: <a
+href="https://nixos.wiki/wiki/NixOS_Installation_Guide"
+class="uri">https://nixos.wiki/wiki/NixOS_Installation_Guide</a></p>
+<ul>
+<li>I followed this one</li>
+</ul></li>
+<li><p>NixOS download: <a href="https://nixos.org/download/"
+class="uri">https://nixos.org/download/</a></p></li>
+</ul>
+<p>My old Lenovo laptop had Windows and Ubuntu dual-booted. My goal was
+to also boot NixOS on this laptop. The plan was to shrink the Ubuntu
+partition and use the free space to install NixOS.</p>
+<h2 id="burning-the-iso-onto-a-usb">Burning the ISO onto a USB</h2>
+<p>I downloaded the NixOS minimal installation <code>.iso</code> file.
+Run <a
+href="https://www.man7.org/linux/man-pages/man8/lsblk.8.html"><code>lsblk</code></a>
+to get something like</p>
+<pre><code>NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINT  
+sda 8:0 0 465.8G 0 disk  
+├─sda1 8:1 0 500M 0 part /boot  
+├─sda2 8:2 0 50.0G 0 part /  
+└─sda3 8:3 0 415.3G 0 part /home  
+sdb 8:16 1 16G 0 disk  
+└─sdb1 8:17 1 16G 0 part /media/usb</code></pre>
+<p>My USB device is identified as <code>sdb</code> so I would run the <a
+href="https://www.man7.org/linux/man-pages/man8/lsblk.8.html"><code>dd</code></a>
+command to burn the image onto the USB. This step took like 30 minutes.
+Also it is normal if at the end it stalls.</p>
+<pre><code>dd if=path/to/nixos.iso of=/dev/sdb bs=4M status=progress conv=fdatasync</code></pre>
+<h2 id="partitioning">Partitioning</h2>
+<h3 id="initial-faffing-about">Initial faffing about</h3>
+<p>I first tried shrinking the Ubuntu partition from inside Ubuntu using
+<code>gparted</code>. Turns out you can’t resize the partition that you
+are currently booting from. (Which sounds obvious in retrospect). So
+instead, I booted from the USB and ran <a
+href="https://www.man7.org/linux/man-pages/man8/parted.8.html"><code>parted</code></a>.
+I am greeted by a interactive prompt like so</p>
+<pre><code>[nixos@nixos:~]$ sudo parted
+GNU Parted 3.5
+Using /dev/sda
+Welcome to GNU Parted! Type &#39;help&#39; to view a list of commands.
+(parted) </code></pre>
+<p>Running the <code>print</code> command after the prompt gave me
+something like this</p>
+<pre><code>(parted) print
+Model: ATA TOSHIBA 
+Disk /dev/sda: 500GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: msdos
+Disk Flags:
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  524MB   523MB   primary  ntfs 
+ 2      524MB   266GB   266GB   primary  ntfs 
+ 3      266GB   267GB   537MB   primary  fat32        boot, esp
+ 4      267GB   500GB   133GB   extended
+ 5      267GB   500GB   133GB   logical
+(parted)</code></pre>
+<ul>
+<li><p>Partition 2 is my Windows partition. “ntfs” is a Windows file
+system. Partition 1 is probably some auxiliary windows partition maybe a
+boot partition or something</p></li>
+<li><p>Partition 5 contained my Ubuntu partition</p></li>
+</ul>
+<p>At first I tried to run <code>resizepart 4 100GB</code> which gave an
+error. Turns out the 3rd argument should be the new End rather than the
+desired size. After resizing it to the correct end, I tried to run <a
+href="https://www.man7.org/linux/man-pages/man8/resize2fs.8.html"><code>resize2fs</code></a>
+and I encountered a loop like in this post <a
+href="https://unix.stackexchange.com/questions/593908/how-to-recover-filesystem-and-physical-size-mismatch"
+class="uri">https://unix.stackexchange.com/questions/593908/how-to-recover-filesystem-and-physical-size-mismatch</a>.</p>
+<p>Running <code>resize2fs</code> gave the error</p>
+<pre><code>resize2fs: Can&#39;t read a block bitmap while trying to resize /dev/sda3
+Please run &#39;e2fsck -fy /dev/sda3&#39; to fix the filesystem
+after the aborted resize operation.</code></pre>
+<p>and running <a
+href="https://www.man7.org/linux/man-pages/man8/e2fsck.8.html"><code>e2fsck</code></a>,
+gave the error</p>
+<pre><code>The filesystem size (according to the superblock) is 186122240 blocks
+The physical size of the device is 159907584 blocks
+Either the superblock or the partition table is likely to be corrupt!
+Abort&lt;y&gt;? </code></pre>
+<p>Essentially the filesystem resides within a partition. In order to
+safely shrink a partition, one must shrink the filesystem inside the
+partition before shrinking the partition. Otherwise one will have
+portion of the filesystem outside the partition which 1) the filesystem
+no longer has access to and 2) could be overwritten by processes out of
+the filesystems control.</p>
+<p>One more interesting thing, while trying to undo my mistake by
+expanding the partition back to the original 500GB end, I tried to
+resize partition 5 first. Since partition 5 is a logical partition
+contained inside the physical partition 4, I had to first resize
+partition 4 and then resize partition 5.</p>
+<h3 id="what-i-was-supposed-to-do">What I was supposed to do</h3>
+<p>So basically after I expanded the partition back to 500GB, I ran the
+following correct sequence</p>
+<pre><code>sudo e2fsck -f /dev/sda5
+sudo resize2fs /dev/sda5 133G 
+sudo parted /dev/sda  
+(parted) resizepart 5 400GB
+(parted) quit
+sudo e2fsck -f /dev/sda5
+sudo parted /dev/sda  
+(parted) mkpart logical ext4 400GB 500GB
+(parted) quit
+sudo e2fsck -f /dev/sda6</code></pre>
+<h2 id="mounting">Mounting</h2>
+<p>This part went fairly smoothly. I run the <a
+href="https://www.man7.org/linux/man-pages/man8/mount.8.html"><code>mount</code></a>
+command to attach the <code>/mnt</code> folder in the USB to the newly
+created partition <code>/dev/sda6</code>.</p>
+<pre><code>sudo mount /dev/sda6 /mnt
+sudo mkdir -p /mnt/boot</code></pre>
+<p>I followed this commands to create a swapfile</p>
+<pre><code>sudo dd if=/dev/zero of=/mnt/.swapfile bs=1024 count=2097152 # 2GB size
+sudo chmod 600 /mnt/.swapfile
+sudo mkswap /mnt/.swapfile
+sudo swapon /mnt/.swapfile</code></pre>
+<h2 id="creating-a-nixos-configuration">Creating a NixOS
+configuration</h2>
+<p>Our first NixOS command is to create a config.
+<code>sudo nixos-generate-config --root /mnt</code>. This creates a
+default <code>configuration.nix</code> file inside
+<code>/mnt/etc/nixos/configuration.nix</code>.</p>
+<p>A large part of time configuring NixOS will be spend modifying
+<code>.nix</code> files from within the <code>/etc/nixos/</code>
+folder.</p>
+<p>Run <code>sudo -e /mnt/etc/nixos/configuration.nix</code> to edit the
+file. Nano was the default editor that came up. I installed Vim shortly
+after.</p>
+<p>Some things to configure</p>
+<ul>
+<li><p>Adding a user</p></li>
+<li><p>Configuring boot loader</p></li>
+</ul>
+<p>I had a couple small issues with configuring the bootloader.
+Initially I left <code>boot.loader.grub.efiSupport = true</code> and
+<code>boot.loader.grub.device = "nodev"</code>. NixOS didn’t boot. To
+check if I had EFI support I booted Ubuntu and ran
+<code>ls /sys/firmware/efi</code>. Since that folder was not found, it
+meant my computer didn’t have EFI. Disabling the option fixed it. The
+next issue I had was on the NixOS boot screen I couldn’t find the option
+to boot Ubuntu or Windows. The fix was to enable
+<code>boot.loader.grub.useOSProber = true</code>. This allows the boot
+loader to look for other operating systems to boot.</p>
+<p>“configuration.nix”:</p>
+<pre><code>  # Add a user!
+  users.users.owenyi = {
+    isNormalUser = true;
+    extraGroups = [ &quot;wheel&quot; ]; # Sudo access
+    home = &quot;/home/owenyi&quot;;
+  };
+  
+  # Use th eGRUB 2 boot loader.
+  boot.loader.grub.enable = true;
+  boot.loader.grub.efiSupport = false;
+  boot.loader.grub.useOSProber = true;
+  boot.loader.grub.device = &quot;/dev/sda&quot;;</code></pre>
+<h3 id="installing-vim">Installing Vim</h3>
+<p>First connect to WiFi by running. From the TUI select connection and
+enter WiFi password.</p>
+<pre><code>sudo systemctl start NetworkManager  
+sudo systemctl enable NetworkManager
+
+sudo nmtui
+# activate connection -&gt; choose wifi -&gt; enter password</code></pre>
+<p>Add the following lines</p>
+<p>“configuration.nix”:</p>
+<pre><code>environment.systemPackages = with pkgs; [ vim ];
+environment.variables.EDITOR = &quot;vim&quot;;</code></pre>
+<p>This installs Vim and also makes it so when I run
+<code>sudo -e</code>, the editor that opens is Vim and not Nano.</p>
+<h2 id="finish-installation">Finish Installation</h2>
+<pre><code>cd /mnt
+sudo nixos-install</code></pre>
+<h1 id="initial-configuring">Initial Configuring</h1>
+<h2 id="flakes">Flakes</h2>
+<p>Further reading: <a
+href="https://nixos-and-flakes.thiscute.world/nixos-with-flakes/start-using-home-manager"
+class="uri">https://nixos-and-flakes.thiscute.world/nixos-with-flakes/start-using-home-manager</a></p>
+<p>Inside <code>/etc/nixos</code>, we create a <code>flake.nix</code>
+file. If you have used Rust before, a
+<code>flake.nix</code>/<code>flake.lock</code> is analogous to a
+<code>Cargo.toml</code>/<code>Cargo.lock</code>. Our
+<code>flake.nix</code> will call our <code>configuration.nix</code> but
+also specify which version of Nixpkgs to use.</p>
+<h2 id="home-manager">Home Manager</h2>
+<p>Further reading: <a
+href="https://nixos-and-flakes.thiscute.world/nixos-with-flakes/start-using-home-manager"
+class="uri">https://nixos-and-flakes.thiscute.world/nixos-with-flakes/start-using-home-manager</a></p>
+<p>I use <code>configuration.nix</code> to specify packages and
+configurations I want applied system wide and <code>home.nix</code> to
+specify configurations to apply to just this user.</p>
+<p>With Home Manager, I can install packages like so</p>
+<pre><code>home.packages = with pkgs; [ noefetch git ];</code></pre>
+<p>I port over my Vim config using the <code>extraConfig</code>
+attribute</p>
+<pre><code>programs.vim = {
+    enable = true;
+    extraConfig = &#39;&#39; 
+        set relativenumber
+        set ai
+        syntax on
+        // ...
+    &#39;&#39;
+}</code></pre>
+<h2 id="remapping-caps-lock-to-esc">Remapping Caps Lock to Esc</h2>
+<p>Remapping Caps Lock to Esc was not very intuitive. When I searched
+this up, most results explained how to do it with Wayland or X11 but I
+needed it to work on console.</p>
+<p>You need to set <code>console.luseXkbCOnfig = true;</code> and set
+the configuration inside <code>services.xserver.xkb.options</code>
+despite having <code>services.xserver.enable = false;</code></p>
+<pre><code>console = {
+    useXkbConfig = true; 
+};
+
+services.xserver = {
+    enable = false;
+    xkb.options = &quot;caps:escape&quot;;
+};</code></pre>
+<h2 id="ssh"><code>ssh</code></h2>
+<p>Further reading: <a href="https://wiki.nixos.org/wiki/SSH"
+class="uri">https://wiki.nixos.org/wiki/SSH</a></p>
+<p>I want to be able to <code>ssh</code> onto my NixOS computer from my
+MacBook.</p>
+<p>I first set <code>services.openssh.enable = true;</code> in the
+<code>configuration.nix</code> and rebuild.The command
+<code>hostname -I</code> gives the IP address. From my Mac I can run
+<code>cat ~/.ssh/id_ed25519.pub | ssh owenyi@ip_address "mkdir -p ~/.ssh &amp;&amp; cat &gt;&gt; ~/.ssh/authorized_keys"</code>.
+Now that I’ve transferred over the <code>ssh</code> keys, I can disable
+password authentication so now only my MacBook can connect and no one
+else.</p>
+<p>On my NixOS machine I modify the “configuration.nix”:</p>
+<pre><code>services.openssh = {
+    enable = true;
+    ports = [ 5432 ]; # or some other port that isn&#39;t the default 22. 
+    settings = {
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+        PermitRootLogin = &quot;no&quot;;
+        AllowUsers = [ &quot;owenyi&quot; ];
+    };
+};</code></pre>
+<p>On my MacBook I add the lines to <code>~/.ssh/config</code></p>
+<pre><code>Host nixos
+  HostName $ip_address
+  User owenyi
+  Port $same_port_as_in_nixos_config
+  IdentityFile ~/.ssh/id_ed25519</code></pre>
+<p>This way I can <code>ssh</code> with the command
+<code>ssh owenyi@nixos</code> instead of something like
+<code>ssh -p port owenyi@ip_address</code>.</p>
+<p>With <code>ssh</code> enabled, I run on my MacBook for example</p>
+<pre><code>scp &#39;owenyi@nixos:/etc/nixos/*&#39; . </code></pre>
+<p>Which grabs all my nixos config files as they are now and copies them
+to my MacBook.</p>
+<h1 id="frequently-used-commands">Frequently Used Commands</h1>
+<pre><code>nixos-rebuild dry-build # dry run to show what packages will be downloaded
+sudo nixos-rebuild test 
+sudo nixos-rebuild switch</code></pre>
+<p>These commands apply changes to the configuration. <code>test</code>
+applies the changes but doesn’t add a “generation”. <code>switch</code>
+applies changes and adds a “generation”. You can boot any previous
+“generation” from the boot menu.</p>
+<pre><code>sudo nix-collect-garbage -d</code></pre>
+<p>The way NixOS applies changes is by installing everything in
+<code>/nix/store</code> and symlinking the appropriate packages into the
+current environment (among other thing such as setting environment
+variables). If I remove a package from my <code>home.nix</code> or
+<code>configuration.nix</code>, the package is still stored in
+<code>/nix/store</code>. <code>nix-collect-garbage</code> will delete
+these dangling packages.</p>
+<pre><code>nixos-option </code></pre>
+<p>The <code>nixos-option</code> command is really great from
+discoverability aspect. This lists all the options that can be
+configured.</p>
+<p>You can traverse down the tree manually for example suppose
+<code>console</code> was in the attribute set printed above. Running
+<code>nixos-option console</code> will bring up attributes under
+<code>console</code>.</p>
+</body>
+</html>
